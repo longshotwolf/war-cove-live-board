@@ -27,6 +27,7 @@
     font-size:clamp(26px,6vw,46px); letter-spacing:.14em; font-weight:800;
     color:#8dffc0; text-shadow:0 0 14px rgba(57,255,176,.75), 0 0 42px rgba(57,255,176,.35);
   }
+  #sub{margin-top:5px; font-size:12.5px; letter-spacing:.22em; color:#7fd8ab; text-transform:uppercase;}
   #clock{
     margin-top:6px; font-size:clamp(17px,3.6vw,26px); font-weight:700; letter-spacing:.08em;
     color:#d9ffe9; font-variant-numeric:tabular-nums;
@@ -50,6 +51,8 @@
     margin-top:8px; font-size:clamp(22px,4.4vw,32px); font-weight:800;
     font-variant-numeric:tabular-nums; color:#fff;
   }
+  .cell .tick{margin-top:6px; font-size:19px; font-weight:900; min-height:1.2em; color:#7fd8ab;}
+  .cell .tick.up{color:var(--green);} .cell .tick.dn{color:var(--red);}
   .cell .word{
     margin-top:10px; font-size:clamp(19px,4.2vw,30px); font-weight:900; letter-spacing:.05em;
     line-height:1.25; min-height:2.5em; display:flex; align-items:center; justify-content:center;
@@ -76,7 +79,7 @@
   .rpush{margin-left:auto; font-weight:800; font-size:13.5px; letter-spacing:.05em; text-align:right;}
   .rpush.GREEN{color:var(--green);} .rpush.RED{color:var(--red);}
   .rpush .plabel{color:#7fd8ab; font-weight:600; letter-spacing:.14em; font-size:11.5px;}
-  /* ---------- TEMP BOX — Terra bottoms / Vega tops ---------- */
+  /* ---------- TEMP panels — bottoms / tops / one minute ---------- */
   .tempsec{border-radius:14px; padding:12px 10px 14px; transition:box-shadow .4s;}
   .tempsec.glow-b{box-shadow:0 0 26px rgba(251,113,133,.35), inset 0 0 34px rgba(251,113,133,.08);}
   .tempsec.glow-t{box-shadow:0 0 26px rgba(34,255,136,.35), inset 0 0 34px rgba(34,255,136,.08);}
@@ -90,6 +93,8 @@
   .tempbar.lit-t{background:linear-gradient(90deg, rgba(34,255,136,.22), rgba(34,255,136,.65), rgba(34,255,136,.22)); box-shadow:0 0 16px rgba(34,255,136,.55); color:#eafff2;}
   .tempwrap{overflow-x:auto;}
   .tgrid{display:grid; grid-template-columns:80px repeat(5, minmax(108px,1fr)); gap:7px; min-width:660px;}
+  .fpgrid{grid-template-columns:88px repeat(4, minmax(132px,1fr)); min-width:640px; margin-bottom:12px;}
+  .onegrid{grid-template-columns:80px repeat(2, minmax(150px,1fr)); min-width:420px;}
   .thead{
     font-size:11.5px; font-weight:800; letter-spacing:.18em; color:#7fd8ab;
     text-align:center; padding:6px 2px;
@@ -112,9 +117,29 @@
   .tcell.lit-b .tstate{color:#ffd9de;}
   .tcell.lit-t{animation:flashEm .9s ease-in-out infinite; border-color:rgba(34,255,136,.9);}
   .tcell.lit-t .tstate{color:#d9ffe9;}
+  /* ---------- FOUR POINTS ---------- */
+  .fpline{
+    display:flex; justify-content:space-between; gap:8px; padding:1px 2px;
+    font-size:12.5px; font-variant-numeric:tabular-nums; color:#cfe9da;
+  }
+  .fpline .fpk{font-weight:800; letter-spacing:.08em; color:#7fd8ab;}
+  .fpline.mid .fpk{color:#ffe9a8;} .fpline.mid .fpv{font-weight:800; color:#fff;}
+  .fpline.onp{background:rgba(255,233,168,.16); border-radius:5px;}
+  .fpstate{margin-top:6px; font-size:11.5px; font-weight:900; letter-spacing:.1em; line-height:1.35; min-height:2.4em;}
+  .fpstate.GREEN{color:var(--green);} .fpstate.RED{color:var(--red);}
+  /* ---------- embeds ---------- */
+  .embedwrap iframe{
+    width:100%; border:1.5px solid var(--line); border-radius:12px; background:#000; display:block;
+  }
+  .openlink{
+    display:block; text-align:center; margin-top:9px; padding:11px 10px;
+    border:1.5px solid var(--line); border-radius:10px; background:var(--panel);
+    color:#8dffc0; font-weight:800; letter-spacing:.18em; font-size:14px; text-decoration:none;
+  }
+  .openlink:hover{background:rgba(34,255,136,.12);}
   footer{
     margin-top:20px; padding-top:12px; border-top:1px solid rgba(57,255,176,.35);
-    text-align:center; font-size:12.5px; letter-spacing:.2em; color:#7fd8ab;
+    text-align:center; font-size:12.5px; letter-spacing:.2em; color:#7fd8ab; line-height:1.9;
   }
 </style>
 </head>
@@ -122,81 +147,87 @@
 <div class="frame">
   <header>
     <h1>WAR COVE LIVE BOARD</h1>
+    <div id="sub">FULL BOARD · EVERY PANEL WORKING · READER ONLY</div>
     <div id="clock">— NYC</div>
     <div id="status">READING THE TAPE…</div>
   </header>
 
   <section>
-    <h2>SIERRA — READING THE THREE MINUTE</h2>
-    <div class="grid3">
-      <div class="cell" id="sierra-LTCUSDT" data-army="">
-        <div class="coin">Ł LITECOIN</div>
-        <div class="price">—</div>
-        <div class="word">READING…</div>
-      </div>
-      <div class="cell" id="sierra-BTCUSDT" data-army="">
-        <div class="coin">₿ BITCOIN</div>
-        <div class="price">—</div>
-        <div class="word">READING…</div>
-      </div>
-      <div class="cell" id="sierra-ETHUSDT" data-army="">
-        <div class="coin">Ξ ETHEREUM</div>
-        <div class="price">—</div>
-        <div class="word">READING…</div>
-      </div>
-    </div>
+    <h2>THE MARKET — LIVE PRICES</h2>
+    <div class="grid3" id="market-grid"></div>
   </section>
 
   <section>
-    <h2>SABLE — READING THE SIX HOUR SPREAD</h2>
-    <div class="rows" id="sable-rows"></div>
+    <h2>6H SPREAD — READING THE SIX HOUR</h2>
+    <div class="rows" id="spread-rows"></div>
   </section>
 
-  <section class="tempsec" id="temp-terra">
-    <h2>TERRA — TEMP BOTTOMS</h2>
-    <div class="tempbar" id="terra-bar">NO BOTTOM HIT LIT</div>
-    <div class="tempwrap"><div class="tgrid" id="terra-grid"></div></div>
+  <section>
+    <h2>3M SURVEY — READING THE THREE MINUTE</h2>
+    <div class="grid3" id="survey-grid"></div>
   </section>
 
-  <section class="tempsec" id="temp-vega">
-    <h2>VEGA — TEMP TOPS</h2>
-    <div class="tempbar" id="vega-bar">NO TOP HIT LIT</div>
-    <div class="tempwrap"><div class="tgrid" id="vega-grid"></div></div>
+  <section class="tempsec" id="temp-bottoms">
+    <h2>TEMP BOTTOMS</h2>
+    <div class="tempbar" id="bot-bar">NO BOTTOM HIT LIT</div>
+    <div class="tempwrap"><div class="tgrid" id="bot-grid"></div></div>
   </section>
 
-  <footer>WAR COVE LIVE BOARD · NEW YORK TIME · READS LIVE OFF THE TAPE</footer>
+  <section class="tempsec" id="temp-tops">
+    <h2>TEMP TOPS</h2>
+    <div class="tempbar" id="top-bar">NO TOP HIT LIT</div>
+    <div class="tempwrap"><div class="tgrid" id="top-grid"></div></div>
+  </section>
+
+  <section class="tempsec" id="temp-one">
+    <h2>ONE MINUTE — TEMP WATCH</h2>
+    <div class="tempbar" id="one-bar">NO 1M HIT LIT</div>
+    <div class="tempwrap"><div class="tgrid onegrid" id="one-grid"></div></div>
+  </section>
+
+  <section>
+    <h2>FOUR POINTS — THE BIG 3</h2>
+    <div class="tempwrap" id="fp-wrap"></div>
+  </section>
+
+  <section>
+    <h2>WAR COVE NEWS</h2>
+    <div class="embedwrap"><iframe src="https://longshotwolf.github.io/war-cove-newsroom/" loading="lazy" title="War Cove News" style="height:500px;"></iframe></div>
+    <a class="openlink" href="https://longshotwolf.github.io/war-cove-newsroom/" target="_blank" rel="noopener">OPEN THE NEWSROOM ↗</a>
+  </section>
+
+  <section>
+    <h2>THE PROOF PAGE — THE GRADED RECORD</h2>
+    <div class="embedwrap"><iframe src="https://longshotwolf.github.io/war-cove-proof-page/" loading="lazy" title="War Cove Proof Page" style="height:560px;"></iframe></div>
+    <a class="openlink" href="https://longshotwolf.github.io/war-cove-proof-page/" target="_blank" rel="noopener">OPEN THE PROOF PAGE ↗</a>
+  </section>
+
+  <section>
+    <h2>WAR COVE PAPER GAME</h2>
+    <div class="embedwrap"><iframe src="https://longshotwolf.github.io/war-cove-board/" loading="lazy" title="War Cove Paper Game" style="height:560px;"></iframe></div>
+    <a class="openlink" href="https://longshotwolf.github.io/war-cove-board/" target="_blank" rel="noopener">OPEN THE PAPER GAME ↗</a>
+  </section>
+
+  <footer>WAR COVE LIVE BOARD · NEW YORK TIME<br>
+  READS LIVE OFF THE BINANCE PUBLIC FEED — THE HOUSE FALLBACK FEED, NAMED PLAIN:<br>
+  THE HOUSE TAPE SENDS NO BROWSER PERMISSION, SO THIS BOARD RUNS ON BINANCE</footer>
 </div>
 
 <script>
 "use strict";
+/* === CORE START === */
 const SYMBOLS = ["LTCUSDT","BTCUSDT","ETHUSDT","SOLUSDT","BCHUSDT","BNBUSDT"];
 const BIG3 = ["LTCUSDT","BTCUSDT","ETHUSDT"];
 const NAMES = {LTCUSDT:"Ł LTC", BTCUSDT:"₿ BTC", ETHUSDT:"Ξ ETH", SOLUSDT:"◎ SOL", BCHUSDT:"BCH", BNBUSDT:"BNB"};
-const BIGMOVE = {LTCUSDT:1.00, BTCUSDT:1000, ETHUSDT:30};
+const BIGMOVE = {LTCUSDT:1.00, BTCUSDT:1000, ETHUSDT:30, SOLUSDT:2, BCHUSDT:30, BNBUSDT:2};
 const POLL_MS = 3000;
 
-/* ---------- data sources: Bitunix primary, Binance fallback ---------- */
-let SOURCE = null; // "BITUNIX" or "BINANCE"
-const BITUNIX = "https://fapi.bitunix.com";
+/* ---------- data source: the Binance public feed ----------
+   The house tape sends no CORS permission header, so no browser
+   page can read it. Every read on this board runs off the Binance public
+   feed — the house fallback — and the board says so on its face. */
 const BINANCE = "https://data-api.binance.vision";
 
-async function bitunixKlines(symbol, interval, limit){
-  const r = await fetch(`${BITUNIX}/api/v1/futures/market/kline?symbol=${symbol}&interval=${interval}&limit=${limit}`);
-  if(!r.ok) throw new Error("bitunix http "+r.status);
-  const j = await r.json();
-  if(j.code !== 0 || !Array.isArray(j.data) || !j.data.length) throw new Error("bitunix payload");
-  return j.data.map(row => ({time:+row.time, open:+row.open, high:+row.high, low:+row.low, close:+row.close}))
-               .sort((a,b)=>a.time-b.time);
-}
-async function bitunixPrices(){
-  const r = await fetch(`${BITUNIX}/api/v1/futures/market/tickers?symbols=${SYMBOLS.join(",")}`);
-  if(!r.ok) throw new Error("bitunix http "+r.status);
-  const j = await r.json();
-  if(j.code !== 0 || !Array.isArray(j.data)) throw new Error("bitunix payload");
-  const out = {};
-  for(const row of j.data){ const p = parseFloat(row.lastPrice); if(isFinite(p)) out[row.symbol] = p; }
-  return out;
-}
 async function binanceKlines(symbol, interval, limit){
   const r = await fetch(`${BINANCE}/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
   if(!r.ok) throw new Error("binance http "+r.status);
@@ -213,13 +244,6 @@ async function binancePrices(){
   for(const row of j){ const p = parseFloat(row.price); if(isFinite(p)) out[row.symbol] = p; }
   return out;
 }
-function getKlines(s,i,l){ return SOURCE === "BITUNIX" ? bitunixKlines(s,i,l) : binanceKlines(s,i,l); }
-function getPrices(){ return SOURCE === "BITUNIX" ? bitunixPrices() : binancePrices(); }
-
-async function detectSource(){
-  try{ await bitunixKlines("LTCUSDT","3m",5); SOURCE = "BITUNIX"; }
-  catch(e){ SOURCE = "BINANCE"; }
-}
 
 /* ---------- Heikin-Ashi ---------- */
 function heikinAshi(candles){
@@ -235,14 +259,15 @@ function heikinAshi(candles){
   return out;
 }
 
-/* ---------- SIERRA — the three minute ----------
+/* ---------- 3M SURVEY — the three minute ----------
    PUSHING = fresh ground on the 3M series (live price beyond the range of
    the previous 3 closed HA candles, in the move's direction).
    SLOWING only when BOTH latest closed HA candles are littler than BOTH
    preceding ones AND no fresh ground was made. Fresh ground forces PUSHING.
    BIG MOVE = fresh ground AND travel from the swing extreme of the last 40
-   closed candles past the coin's line (LTC $1.00 · BTC $1,000 · ETH $30). */
-function sierraRead(symbol, raw, live){
+   closed candles past the coin's line (LTC $1.00 · BTC $1,000 · ETH $30 ·
+   SOL $2 · BCH $30 · BNB $2). */
+function surveyRead(symbol, raw, live){
   const ha = heikinAshi(raw);
   const closed = ha.slice(0, -1);
   const forming = ha[ha.length - 1];
@@ -273,7 +298,7 @@ function sierraRead(symbol, raw, live){
 /* AGREEMENT RULE: when the 6H spread is at cycle size or beyond, the push
    read carries the spread's army — cycle down is red army on both reads,
    cycle up is green army on both. The two reads never contradict. */
-const CYCLE_LINE = { LTCUSDT: 0.30, BTCUSDT: 300, ETHUSDT: 9 };
+const CYCLE_LINE = { LTCUSDT: 0.30, BTCUSDT: 300, ETHUSDT: 9, SOLUSDT: 2, BCHUSDT: 30, BNBUSDT: 2 };
 function composeWord(symbol, read, spread){
   let army = read.army;
   if(spread != null && Math.abs(spread) >= CYCLE_LINE[symbol])
@@ -283,8 +308,10 @@ function composeWord(symbol, read, spread){
   return { army, word };
 }
 
-/* ---------- SABLE — the six hour spread ----------
-   Spread = live price − the forming 6H Heikin-Ashi candle's close value. */
+/* ---------- 6H SPREAD ----------
+   Spread = live price − the forming 6H Heikin-Ashi candle's close value.
+   LTC scale (the Nov 15 ruling): under 30¢ a weak move · 30¢ and beyond
+   A CYCLE · $1.00+ the big move. */
 function bandWord(symbol, spread){
   const a = Math.abs(spread);
   switch(symbol){
@@ -307,108 +334,11 @@ function fmtSpread(symbol, spread){
   if(symbol === "LTCUSDT") return sign + Math.round(Math.abs(spread) * 100) + "¢";
   return sign + "$" + Math.abs(spread).toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2});
 }
-const nycTime = new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York", hour:"numeric", minute:"2-digit", second:"2-digit", hour12:true});
-const nycClock = new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York", weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit", second:"2-digit", hour12:true});
 
-/* ---------- build Sable rows ---------- */
-const sableRows = {};
-(function(){
-  const wrap = document.getElementById("sable-rows");
-  for(const s of SYMBOLS){
-    const row = document.createElement("div");
-    row.className = "row"; row.id = "sable-" + s;
-    row.innerHTML = '<span class="rcoin"></span><span class="rprice">—</span>' +
-                    '<span class="rspread">—</span><span class="rband">—</span>' +
-                    (BIG3.includes(s) ? '<span class="rpush"></span>' : '');
-    row.querySelector(".rcoin").textContent = NAMES[s];
-    wrap.appendChild(row);
-    sableRows[s] = { row,
-      price: row.querySelector(".rprice"),
-      spread: row.querySelector(".rspread"),
-      band: row.querySelector(".rband"),
-      push: row.querySelector(".rpush") };
-  }
-})();
-
-/* ---------- render ---------- */
-const sierraState = {}; // symbol -> {word, timer}
-function renderSierra(symbol, read, live){
-  const cell = document.getElementById("sierra-" + symbol);
-  cell.querySelector(".price").textContent = fmtPrice(live);
-  cell.querySelector(".word").textContent = read.word;
-  cell.dataset.army = read.army;
-  const prev = sierraState[symbol];
-  if(!prev || prev.word !== read.word){
-    cell.classList.remove("flash-green","flash-red");
-    void cell.offsetWidth; // restart the flash
-    cell.classList.add(read.army === "GREEN" ? "flash-green" : "flash-red");
-    if(prev && prev.timer) clearTimeout(prev.timer);
-    const timer = setTimeout(() => cell.classList.remove("flash-green","flash-red"), 60000);
-    sierraState[symbol] = { word: read.word, timer };
-  }
-}
-function renderSable(symbol, live, spread, sierra){
-  const R = sableRows[symbol];
-  R.price.textContent = fmtPrice(live);
-  R.spread.textContent = fmtSpread(symbol, spread);
-  R.spread.className = "rspread " + (spread >= 0 ? "pos" : "neg");
-  R.band.textContent = bandWord(symbol, spread);
-  if(R.push && sierra){
-    R.push.innerHTML = '<span class="plabel">3M PUSH&nbsp;&nbsp;</span>' +
-      sierra.word.replace(/^(GREEN|RED) ARMY /, "");
-    R.push.className = "rpush " + sierra.army;
-  }
-}
-
-/* ---------- clock ---------- */
-function tickClock(){
-  document.getElementById("clock").textContent = nycClock.format(new Date()) + " · NYC";
-}
-setInterval(tickClock, 1000); tickClock();
-
-/* ---------- poll ---------- */
-const statusEl = document.getElementById("status");
-let fellBack = false;
-async function poll(){
-  try{
-    if(!SOURCE) await detectSource();
-    const prices = await getPrices();
-    const jobs = [];
-    for(const s of BIG3) jobs.push(getKlines(s, "3m", 120).then(k => ({kind:"3m", s, k})));
-    for(const s of SYMBOLS) jobs.push(getKlines(s, "6h", 60).then(k => ({kind:"6h", s, k})));
-    const res = await Promise.all(jobs);
-    const k3 = {}, k6 = {};
-    for(const r of res){ if(r.kind === "3m") k3[r.s] = r.k; else k6[r.s] = r.k; }
-    const spreads = {};
-    for(const s of SYMBOLS){
-      if(prices[s] != null && k6[s]){
-        const ha6 = heikinAshi(k6[s]);
-        spreads[s] = prices[s] - ha6[ha6.length - 1].close;
-      }
-    }
-    const reads = {};
-    for(const s of BIG3){
-      if(prices[s] != null && k3[s]){
-        reads[s] = composeWord(s, sierraRead(s, k3[s], prices[s]), spreads[s]);
-        renderSierra(s, reads[s], prices[s]);
-      }
-    }
-    for(const s of SYMBOLS){
-      if(spreads[s] != null) renderSable(s, prices[s], spreads[s], reads[s] || null);
-    }
-    statusEl.textContent = "● LIVE — " + SOURCE + " · UPDATED " + nycTime.format(new Date()) + " NYC";
-  }catch(e){
-    if(SOURCE === "BITUNIX" && !fellBack){ fellBack = true; SOURCE = "BINANCE"; return poll(); }
-    statusEl.textContent = "RECONNECTING TO THE TAPE…";
-  }
-}
-poll();
-setInterval(poll, POLL_MS);
-
-/* ---------- TEMP BOX — TERRA temp bottoms / VEGA temp tops ----------
-   Reader only: this box reads and displays, nothing else. Every number is
-   computed here in the visitor's own browser off the Binance public feed —
-   no house server, no house feed files.
+/* ---------- TEMP machinery — bottoms / tops / one minute ----------
+   Reader only: this machinery reads and displays, nothing else. Every
+   number is computed here in the visitor's own browser off the Binance
+   public feed — no house server, no house feed files.
    Each frame's level rides the FORMING Heikin-Ashi candle: bottom level =
    its low extreme, top level = its high extreme. A fresh extension of the
    extreme is a new hit and fires once per level; a standing level never
@@ -424,40 +354,6 @@ const FRAMES = [
 const HIT_BAND = 0.0015;    // hit while within 0.15% of the level
 const PIERCE_BAND = 0.0005; // more than 0.05% through it = through
 const TEMP_FLASH_MS = 60000;
-
-const tempCells = {}; // "bottom|LTCUSDT|MONTH" -> cell record
-(function buildTempGrids(){
-  for(const side of ["bottom","top"]){
-    const grid = document.getElementById(side === "bottom" ? "terra-grid" : "vega-grid");
-    const corner = document.createElement("div");
-    corner.className = "thead"; corner.textContent = "COIN";
-    grid.appendChild(corner);
-    for(const f of FRAMES){
-      const h = document.createElement("div");
-      h.className = "thead"; h.textContent = f.key;
-      grid.appendChild(h);
-    }
-    for(const s of SYMBOLS){
-      const c = document.createElement("div");
-      c.className = "tcoin"; c.textContent = NAMES[s];
-      grid.appendChild(c);
-      for(const f of FRAMES){
-        const el = document.createElement("div");
-        el.className = "tcell";
-        el.innerHTML = '<div class="tlvl">—</div><div class="tstate">READING…</div><div class="trec"></div>';
-        grid.appendChild(el);
-        tempCells[side + "|" + s + "|" + f.key] = {
-          side, symbol:s, frame:f.key, el,
-          lvlEl: el.querySelector(".tlvl"),
-          stateEl: el.querySelector(".tstate"),
-          recEl: el.querySelector(".trec"),
-          candleTime:null, level:null, record:null,
-          state:null, flashUntil:0
-        };
-      }
-    }
-  }
-})();
 
 function tempHitState(side, live, level){
   if(side === "bottom"){
@@ -503,6 +399,234 @@ function tempEvaluate(cell, candles, live){
   cell.dist = res.dist;
   cell.lit = res.state === "hit" || now < cell.flashUntil;
 }
+
+/* ---------- FOUR POINTS ----------
+   The four points of the forming Heikin-Ashi candle, read in the direction
+   price is travelling through it:
+   P1 = the body end away from the wick (the end price meets first) ·
+   P2 = THE MIDDLE of the candle — over it green has it, under it red is
+   winning · P3 = where the candle meets the wick · P4 = the wick tip. */
+function fourPoints(ha, live){
+  const f = ha[ha.length - 1];
+  const mid = (f.high + f.low) / 2;
+  let p1, p3, p4, holder;
+  if(live >= mid){
+    holder = "GREEN";
+    p1 = Math.min(f.open, f.close); // body end away from the upper wick
+    p3 = Math.max(f.open, f.close); // body meets the upper wick
+    p4 = f.high;                    // upper wick tip
+  } else {
+    holder = "RED";
+    p1 = Math.max(f.open, f.close); // body end away from the lower wick
+    p3 = Math.min(f.open, f.close); // body meets the lower wick
+    p4 = f.low;                     // lower wick tip
+  }
+  const points = { P1: p1, P2: mid, P3: p3, P4: p4 };
+  let on = null;
+  for(const k of ["P1","P2","P3","P4"]){
+    if(Math.abs(live - points[k]) <= points[k] * 0.0005){ on = k; break; }
+  }
+  return { points, holder, on };
+}
+/* === CORE END === */
+
+/* ---------- NYC clock ---------- */
+const nycTime = new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York", hour:"numeric", minute:"2-digit", second:"2-digit", hour12:true});
+const nycClock = new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York", weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit", second:"2-digit", hour12:true});
+function tickClock(){
+  document.getElementById("clock").textContent = nycClock.format(new Date()) + " · NYC";
+}
+setInterval(tickClock, 1000); tickClock();
+
+/* ---------- build MARKET cells ---------- */
+const marketCells = {};
+(function(){
+  const grid = document.getElementById("market-grid");
+  for(const s of SYMBOLS){
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.innerHTML = '<div class="coin"></div><div class="price">—</div><div class="tick">—</div>';
+    cell.querySelector(".coin").textContent = NAMES[s];
+    grid.appendChild(cell);
+    marketCells[s] = { price: cell.querySelector(".price"), tick: cell.querySelector(".tick"), prev: null };
+  }
+})();
+function renderMarket(symbol, live){
+  const M = marketCells[symbol];
+  M.price.textContent = fmtPrice(live);
+  if(M.prev != null && live !== M.prev){
+    M.tick.textContent = live > M.prev ? "▲" : "▼";
+    M.tick.className = "tick " + (live > M.prev ? "up" : "dn");
+  }
+  M.prev = live;
+}
+
+/* ---------- build SURVEY cells ---------- */
+(function(){
+  const grid = document.getElementById("survey-grid");
+  const FULL = {LTCUSDT:"Ł LITECOIN", BTCUSDT:"₿ BITCOIN", ETHUSDT:"Ξ ETHEREUM", SOLUSDT:"◎ SOLANA", BCHUSDT:"BCH BITCOIN CASH", BNBUSDT:"BNB"};
+  for(const s of SYMBOLS){
+    const cell = document.createElement("div");
+    cell.className = "cell"; cell.id = "survey-" + s; cell.dataset.army = "";
+    cell.innerHTML = '<div class="coin"></div><div class="price">—</div><div class="word">READING…</div>';
+    cell.querySelector(".coin").textContent = FULL[s];
+    grid.appendChild(cell);
+  }
+})();
+const surveyState = {}; // symbol -> {word, timer}
+function renderSurvey(symbol, read, live){
+  const cell = document.getElementById("survey-" + symbol);
+  cell.querySelector(".price").textContent = fmtPrice(live);
+  cell.querySelector(".word").textContent = read.word;
+  cell.dataset.army = read.army;
+  const prev = surveyState[symbol];
+  if(!prev || prev.word !== read.word){
+    cell.classList.remove("flash-green","flash-red");
+    void cell.offsetWidth; // restart the flash
+    cell.classList.add(read.army === "GREEN" ? "flash-green" : "flash-red");
+    if(prev && prev.timer) clearTimeout(prev.timer);
+    const timer = setTimeout(() => cell.classList.remove("flash-green","flash-red"), 60000);
+    surveyState[symbol] = { word: read.word, timer };
+  }
+}
+
+/* ---------- build SPREAD rows ---------- */
+const spreadRows = {};
+(function(){
+  const wrap = document.getElementById("spread-rows");
+  for(const s of SYMBOLS){
+    const row = document.createElement("div");
+    row.className = "row"; row.id = "spread-" + s;
+    row.innerHTML = '<span class="rcoin"></span><span class="rprice">—</span>' +
+                    '<span class="rspread">—</span><span class="rband">—</span>' +
+                    '<span class="rpush"></span>';
+    row.querySelector(".rcoin").textContent = NAMES[s];
+    wrap.appendChild(row);
+    spreadRows[s] = { row,
+      price: row.querySelector(".rprice"),
+      spread: row.querySelector(".rspread"),
+      band: row.querySelector(".rband"),
+      push: row.querySelector(".rpush") };
+  }
+})();
+function renderSpread(symbol, live, spread, survey){
+  const R = spreadRows[symbol];
+  R.price.textContent = fmtPrice(live);
+  R.spread.textContent = fmtSpread(symbol, spread);
+  R.spread.className = "rspread " + (spread >= 0 ? "pos" : "neg");
+  R.band.textContent = bandWord(symbol, spread);
+  if(survey){
+    R.push.innerHTML = '<span class="plabel">3M PUSH&nbsp;&nbsp;</span>' +
+      survey.word.replace(/^(GREEN|RED) ARMY /, "");
+    R.push.className = "rpush " + survey.army;
+  }
+}
+
+/* ---------- main poll: market · spread · survey ---------- */
+const statusEl = document.getElementById("status");
+async function poll(){
+  try{
+    const prices = await binancePrices();
+    const jobs = [];
+    for(const s of SYMBOLS) jobs.push(binanceKlines(s, "3m", 120).then(k => ({kind:"3m", s, k})));
+    for(const s of SYMBOLS) jobs.push(binanceKlines(s, "6h", 60).then(k => ({kind:"6h", s, k})));
+    const res = await Promise.all(jobs);
+    const k3 = {}, k6 = {};
+    for(const r of res){ if(r.kind === "3m") k3[r.s] = r.k; else k6[r.s] = r.k; }
+    const spreads = {};
+    for(const s of SYMBOLS){
+      if(prices[s] != null && k6[s]){
+        const ha6 = heikinAshi(k6[s]);
+        spreads[s] = prices[s] - ha6[ha6.length - 1].close;
+      }
+    }
+    const reads = {};
+    for(const s of SYMBOLS){
+      if(prices[s] != null && k3[s]){
+        reads[s] = composeWord(s, surveyRead(s, k3[s], prices[s]), spreads[s]);
+        renderSurvey(s, reads[s], prices[s]);
+      }
+    }
+    for(const s of SYMBOLS){
+      if(prices[s] != null) renderMarket(s, prices[s]);
+      if(spreads[s] != null) renderSpread(s, prices[s], spreads[s], reads[s] || null);
+    }
+    statusEl.textContent = "● LIVE — BINANCE PUBLIC FEED · UPDATED " + nycTime.format(new Date()) + " NYC";
+  }catch(e){
+    statusEl.textContent = "RECONNECTING TO THE FEED…";
+  }
+}
+poll();
+setInterval(poll, POLL_MS);
+
+/* ---------- TEMP grids — bottoms / tops (five frames) ---------- */
+const tempCells = {}; // "bottom|LTCUSDT|MONTH" -> cell record
+(function buildTempGrids(){
+  for(const side of ["bottom","top"]){
+    const grid = document.getElementById(side === "bottom" ? "bot-grid" : "top-grid");
+    const corner = document.createElement("div");
+    corner.className = "thead"; corner.textContent = "COIN";
+    grid.appendChild(corner);
+    for(const f of FRAMES){
+      const h = document.createElement("div");
+      h.className = "thead"; h.textContent = f.key;
+      grid.appendChild(h);
+    }
+    for(const s of SYMBOLS){
+      const c = document.createElement("div");
+      c.className = "tcoin"; c.textContent = NAMES[s];
+      grid.appendChild(c);
+      for(const f of FRAMES){
+        const el = document.createElement("div");
+        el.className = "tcell";
+        el.innerHTML = '<div class="tlvl">—</div><div class="tstate">READING…</div><div class="trec"></div>';
+        grid.appendChild(el);
+        tempCells[side + "|" + s + "|" + f.key] = {
+          side, symbol:s, frame:f.key, el,
+          lvlEl: el.querySelector(".tlvl"),
+          stateEl: el.querySelector(".tstate"),
+          recEl: el.querySelector(".trec"),
+          candleTime:null, level:null, record:null,
+          state:null, flashUntil:0
+        };
+      }
+    }
+  }
+})();
+
+/* ---------- ONE MINUTE grid — bottom + top per coin ---------- */
+const oneCells = {}; // "one|bottom|LTCUSDT" -> cell record
+(function buildOneGrid(){
+  const grid = document.getElementById("one-grid");
+  const corner = document.createElement("div");
+  corner.className = "thead"; corner.textContent = "COIN";
+  grid.appendChild(corner);
+  for(const label of ["BOTTOM","TOP"]){
+    const h = document.createElement("div");
+    h.className = "thead"; h.textContent = label;
+    grid.appendChild(h);
+  }
+  for(const s of SYMBOLS){
+    const c = document.createElement("div");
+    c.className = "tcoin"; c.textContent = NAMES[s];
+    grid.appendChild(c);
+    for(const side of ["bottom","top"]){
+      const el = document.createElement("div");
+      el.className = "tcell";
+      el.innerHTML = '<div class="tlvl">—</div><div class="tstate">READING…</div><div class="trec"></div>';
+      grid.appendChild(el);
+      oneCells["one|" + side + "|" + s] = {
+        side, symbol:s, frame:"1M", el,
+        lvlEl: el.querySelector(".tlvl"),
+        stateEl: el.querySelector(".tstate"),
+        recEl: el.querySelector(".trec"),
+        candleTime:null, level:null, record:null,
+        state:null, flashUntil:0
+      };
+    }
+  }
+})();
+
 function tempRenderCell(cell){
   cell.lvlEl.textContent = fmtPrice(cell.level);
   if(cell.state === "through"){
@@ -532,8 +656,8 @@ function tempRenderSideLights(){
       c.el.classList.toggle("lit-t", side === "top" && c.lit);
       if(c.lit && (!litCell || (c.record && litCell.record && c.record.time > litCell.record.time))) litCell = c;
     }
-    const sec = document.getElementById(side === "bottom" ? "temp-terra" : "temp-vega");
-    const bar = document.getElementById(side === "bottom" ? "terra-bar" : "vega-bar");
+    const sec = document.getElementById(side === "bottom" ? "temp-bottoms" : "temp-tops");
+    const bar = document.getElementById(side === "bottom" ? "bot-bar" : "top-bar");
     sec.classList.toggle("glow-b", side === "bottom" && !!litCell);
     sec.classList.toggle("glow-t", side === "top" && !!litCell);
     bar.classList.toggle("lit-b", side === "bottom" && !!litCell);
@@ -543,13 +667,103 @@ function tempRenderSideLights(){
       : (side === "bottom" ? "NO BOTTOM HIT LIT" : "NO TOP HIT LIT");
   }
 }
+function oneRenderLights(){
+  let litCell = null;
+  for(const k in oneCells){
+    const c = oneCells[k];
+    c.lit = c.state === "hit" || Date.now() < c.flashUntil;
+    c.el.classList.toggle("lit-b", c.side === "bottom" && c.lit);
+    c.el.classList.toggle("lit-t", c.side === "top" && c.lit);
+    if(c.lit && (!litCell || (c.record && litCell.record && c.record.time > litCell.record.time))) litCell = c;
+  }
+  const sec = document.getElementById("temp-one");
+  const bar = document.getElementById("one-bar");
+  sec.classList.toggle("glow-b", !!litCell && litCell.side === "bottom");
+  sec.classList.toggle("glow-t", !!litCell && litCell.side === "top");
+  bar.classList.toggle("lit-b", !!litCell && litCell.side === "bottom");
+  bar.classList.toggle("lit-t", !!litCell && litCell.side === "top");
+  bar.textContent = litCell
+    ? "💡 1M HIT LIT — " + NAMES[litCell.symbol] + " " + (litCell.side === "bottom" ? "BOTTOM" : "TOP")
+    : "NO 1M HIT LIT";
+}
 
+/* ---------- FOUR POINTS panel — the big 3 × MONTH · WEEK · DAY · 6H ---------- */
+const FP_FRAMES = FRAMES.filter(f => f.key !== "4H");
+const fpCells = {}; // "LTCUSDT|MONTH" -> cell record
+(function buildFpGrids(){
+  const wrap = document.getElementById("fp-wrap");
+  for(const s of BIG3){
+    const grid = document.createElement("div");
+    grid.className = "tgrid fpgrid";
+    const corner = document.createElement("div");
+    corner.className = "thead"; corner.textContent = "FRAME";
+    grid.appendChild(corner);
+    for(const f of FP_FRAMES){
+      const h = document.createElement("div");
+      h.className = "thead"; h.textContent = f.key;
+      grid.appendChild(h);
+    }
+    const c = document.createElement("div");
+    c.className = "tcoin"; c.textContent = NAMES[s];
+    grid.appendChild(c);
+    for(const f of FP_FRAMES){
+      const el = document.createElement("div");
+      el.className = "tcell";
+      el.innerHTML =
+        '<div class="fpline"><span class="fpk">P1</span><span class="fpv" data-p="P1">—</span></div>' +
+        '<div class="fpline mid"><span class="fpk">P2 · MIDDLE</span><span class="fpv" data-p="P2">—</span></div>' +
+        '<div class="fpline"><span class="fpk">P3</span><span class="fpv" data-p="P3">—</span></div>' +
+        '<div class="fpline"><span class="fpk">P4</span><span class="fpv" data-p="P4">—</span></div>' +
+        '<div class="fpstate">READING…</div>';
+      grid.appendChild(el);
+      fpCells[s + "|" + f.key] = {
+        symbol:s, frame:f.key, el,
+        pv: { P1: el.querySelector('[data-p="P1"]'), P2: el.querySelector('[data-p="P2"]'),
+              P3: el.querySelector('[data-p="P3"]'), P4: el.querySelector('[data-p="P4"]') },
+        lines: { P1: el.querySelector('[data-p="P1"]').parentElement, P2: el.querySelector('[data-p="P2"]').parentElement,
+                 P3: el.querySelector('[data-p="P3"]').parentElement, P4: el.querySelector('[data-p="P4"]').parentElement },
+        stateEl: el.querySelector(".fpstate")
+      };
+    }
+    wrap.appendChild(grid);
+  }
+})();
+function fpRender(prices){
+  for(const k in fpCells){
+    const cell = fpCells[k];
+    const iv = FP_FRAMES.find(f => f.key === cell.frame).iv;
+    const candles = tempKlineCache[cell.symbol + "|" + iv];
+    const live = prices[cell.symbol];
+    if(!candles || candles.length < 2 || live == null) continue;
+    const fp = fourPoints(heikinAshi(candles), live);
+    for(const p of ["P1","P2","P3","P4"]){
+      cell.pv[p].textContent = fmtPrice(fp.points[p]);
+      cell.lines[p].classList.toggle("onp", fp.on === p);
+    }
+    cell.stateEl.textContent = fp.on
+      ? "PRICE ON " + fp.on + (fp.on === "P2" ? " — THE MIDDLE" : "")
+      : (fp.holder === "GREEN" ? "GREEN HAS IT — OVER THE MIDDLE" : "RED WINNING — UNDER THE MIDDLE");
+    cell.stateEl.className = "fpstate " + fp.holder;
+  }
+}
+
+/* ---------- temp / one-minute / four-points data loops ---------- */
 const tempKlineCache = {}; // "LTCUSDT|1M" -> candles
 async function tempFetchKlines(){
   const jobs = [];
   for(const s of SYMBOLS) for(const f of FRAMES){
     jobs.push(binanceKlines(s, f.iv, 100)
       .then(k => { tempKlineCache[s + "|" + f.iv] = k; })
+      .catch(() => {}));
+  }
+  await Promise.all(jobs);
+}
+const oneKlineCache = {}; // "LTCUSDT" -> 1m candles
+async function oneFetchKlines(){
+  const jobs = [];
+  for(const s of SYMBOLS){
+    jobs.push(binanceKlines(s, "1m", 100)
+      .then(k => { oneKlineCache[s] = k; })
       .catch(() => {}));
   }
   await Promise.all(jobs);
@@ -566,13 +780,25 @@ async function tempTick(){
         tempRenderCell(cell);
       }
     }
+    for(const k in oneCells){
+      const cell = oneCells[k];
+      const candles = oneKlineCache[cell.symbol];
+      if(candles && candles.length > 1 && prices[cell.symbol] != null){
+        tempEvaluate(cell, candles, prices[cell.symbol]);
+        tempRenderCell(cell);
+      }
+    }
+    fpRender(prices);
     tempRenderSideLights();
+    oneRenderLights();
   }catch(e){ /* next tick retries; the board's main status line reports feed trouble */ }
 }
 tempFetchKlines().then(tempTick);
+oneFetchKlines().then(tempTick);
 setInterval(tempFetchKlines, 30000);
+setInterval(oneFetchKlines, 15000);
 setInterval(tempTick, 5000);
-setInterval(tempRenderSideLights, 1000); // the 60-second holds expire on time
+setInterval(() => { tempRenderSideLights(); oneRenderLights(); }, 1000); // the 60-second holds expire on time
 </script>
 </body>
 </html>
