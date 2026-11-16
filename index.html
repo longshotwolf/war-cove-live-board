@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>War Cove Live Board</title>
+<style>
+  :root{
+    --green:#22ff88; --red:#ff4455; --holo:#39ffb0; --ink:#e8fff2;
+    --panel:rgba(6,20,14,.82); --line:rgba(57,255,176,.5);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:#04070a radial-gradient(1200px 600px at 50% -10%, rgba(20,90,60,.35), transparent 60%);
+    color:var(--ink);
+    font-family:"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height:100vh; padding:14px 12px 26px;
+  }
+  .frame{
+    max-width:1060px; margin:0 auto; padding:18px 16px 14px;
+    border:2px solid var(--line); border-radius:14px;
+    box-shadow:0 0 22px rgba(57,255,176,.28), inset 0 0 34px rgba(57,255,176,.07);
+    background:rgba(3,10,7,.55);
+  }
+  header{text-align:center; padding:6px 4px 12px; border-bottom:1px solid rgba(57,255,176,.35);}
+  h1{
+    font-size:clamp(26px,6vw,46px); letter-spacing:.14em; font-weight:800;
+    color:#8dffc0; text-shadow:0 0 14px rgba(57,255,176,.75), 0 0 42px rgba(57,255,176,.35);
+  }
+  #clock{
+    margin-top:6px; font-size:clamp(17px,3.6vw,26px); font-weight:700; letter-spacing:.08em;
+    color:#d9ffe9; font-variant-numeric:tabular-nums;
+  }
+  #status{margin-top:4px; font-size:12.5px; letter-spacing:.18em; color:#7fd8ab; text-transform:uppercase;}
+  section{margin-top:18px;}
+  h2{
+    font-size:clamp(14px,2.8vw,19px); letter-spacing:.22em; font-weight:800; color:#8dffc0;
+    text-shadow:0 0 10px rgba(57,255,176,.5); margin-bottom:10px; text-align:center;
+  }
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  @media (max-width:680px){ .grid3{grid-template-columns:1fr;} }
+  .cell{
+    background:var(--panel); border:1.5px solid var(--line); border-radius:12px;
+    padding:16px 12px 18px; text-align:center;
+    box-shadow:inset 0 0 22px rgba(57,255,176,.06);
+    transition:border-color .3s;
+  }
+  .cell .coin{font-size:15px; letter-spacing:.24em; font-weight:700; color:#b9ffd6;}
+  .cell .price{
+    margin-top:8px; font-size:clamp(22px,4.4vw,32px); font-weight:800;
+    font-variant-numeric:tabular-nums; color:#fff;
+  }
+  .cell .word{
+    margin-top:10px; font-size:clamp(19px,4.2vw,30px); font-weight:900; letter-spacing:.05em;
+    line-height:1.25; min-height:2.5em; display:flex; align-items:center; justify-content:center;
+  }
+  .cell[data-army="GREEN"]{border-color:rgba(34,255,136,.75);}
+  .cell[data-army="GREEN"] .word{color:var(--green); text-shadow:0 0 12px rgba(34,255,136,.65);}
+  .cell[data-army="RED"]{border-color:rgba(255,68,85,.75);}
+  .cell[data-army="RED"] .word{color:var(--red); text-shadow:0 0 12px rgba(255,68,85,.65);}
+  @keyframes flashGreen{0%,100%{background:rgba(34,255,136,.08);}50%{background:rgba(34,255,136,.48);}}
+  @keyframes flashRed{0%,100%{background:rgba(255,68,85,.08);}50%{background:rgba(255,68,85,.48);}}
+  .cell.flash-green{animation:flashGreen .9s ease-in-out infinite;}
+  .cell.flash-red{animation:flashRed .9s ease-in-out infinite;}
+  .rows{display:flex; flex-direction:column; gap:9px;}
+  .row{
+    display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px;
+    background:var(--panel); border:1.5px solid rgba(57,255,176,.4); border-radius:10px;
+    padding:11px 14px;
+  }
+  .rcoin{font-weight:800; letter-spacing:.14em; min-width:118px; color:#b9ffd6; font-size:15px;}
+  .rprice{font-weight:700; font-variant-numeric:tabular-nums; min-width:110px; font-size:16px;}
+  .rspread{font-weight:900; font-variant-numeric:tabular-nums; min-width:104px; font-size:17px;}
+  .rspread.pos{color:var(--green);} .rspread.neg{color:var(--red);}
+  .rband{font-weight:800; letter-spacing:.06em; font-size:16px; color:#ffe9a8;}
+  .rpush{margin-left:auto; font-weight:800; font-size:13.5px; letter-spacing:.05em; text-align:right;}
+  .rpush.GREEN{color:var(--green);} .rpush.RED{color:var(--red);}
+  .rpush .plabel{color:#7fd8ab; font-weight:600; letter-spacing:.14em; font-size:11.5px;}
+  footer{
+    margin-top:20px; padding-top:12px; border-top:1px solid rgba(57,255,176,.35);
+    text-align:center; font-size:12.5px; letter-spacing:.2em; color:#7fd8ab;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <h1>WAR COVE LIVE BOARD</h1>
+    <div id="clock">— NYC</div>
+    <div id="status">READING THE TAPE…</div>
+  </header>
+
+  <section>
+    <h2>SIERRA — READING THE THREE MINUTE</h2>
+    <div class="grid3">
+      <div class="cell" id="sierra-LTCUSDT" data-army="">
+        <div class="coin">Ł LITECOIN</div>
+        <div class="price">—</div>
+        <div class="word">READING…</div>
+      </div>
+      <div class="cell" id="sierra-BTCUSDT" data-army="">
+        <div class="coin">₿ BITCOIN</div>
+        <div class="price">—</div>
+        <div class="word">READING…</div>
+      </div>
+      <div class="cell" id="sierra-ETHUSDT" data-army="">
+        <div class="coin">Ξ ETHEREUM</div>
+        <div class="price">—</div>
+        <div class="word">READING…</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>SABLE — READING THE SIX HOUR SPREAD</h2>
+    <div class="rows" id="sable-rows"></div>
+  </section>
+
+  <footer>WAR COVE LIVE BOARD · NEW YORK TIME · READS LIVE OFF THE TAPE</footer>
+</div>
+
+<script>
+"use strict";
+const SYMBOLS = ["LTCUSDT","BTCUSDT","ETHUSDT","SOLUSDT","BCHUSDT","BNBUSDT"];
+const BIG3 = ["LTCUSDT","BTCUSDT","ETHUSDT"];
+const NAMES = {LTCUSDT:"Ł LTC", BTCUSDT:"₿ BTC", ETHUSDT:"Ξ ETH", SOLUSDT:"◎ SOL", BCHUSDT:"BCH", BNBUSDT:"BNB"};
+const BIGMOVE = {LTCUSDT:1.00, BTCUSDT:1000, ETHUSDT:30};
+const POLL_MS = 3000;
+
+/* ---------- data sources: Bitunix primary, Binance fallback ---------- */
+let SOURCE = null; // "BITUNIX" or "BINANCE"
+const BITUNIX = "https://fapi.bitunix.com";
+const BINANCE = "https://data-api.binance.vision";
+
+async function bitunixKlines(symbol, interval, limit){
+  const r = await fetch(`${BITUNIX}/api/v1/futures/market/kline?symbol=${symbol}&interval=${interval}&limit=${limit}`);
+  if(!r.ok) throw new Error("bitunix http "+r.status);
+  const j = await r.json();
+  if(j.code !== 0 || !Array.isArray(j.data) || !j.data.length) throw new Error("bitunix payload");
+  return j.data.map(row => ({time:+row.time, open:+row.open, high:+row.high, low:+row.low, close:+row.close}))
+               .sort((a,b)=>a.time-b.time);
+}
+async function bitunixPrices(){
+  const r = await fetch(`${BITUNIX}/api/v1/futures/market/tickers?symbols=${SYMBOLS.join(",")}`);
+  if(!r.ok) throw new Error("bitunix http "+r.status);
+  const j = await r.json();
+  if(j.code !== 0 || !Array.isArray(j.data)) throw new Error("bitunix payload");
+  const out = {};
+  for(const row of j.data){ const p = parseFloat(row.lastPrice); if(isFinite(p)) out[row.symbol] = p; }
+  return out;
+}
+async function binanceKlines(symbol, interval, limit){
+  const r = await fetch(`${BINANCE}/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
+  if(!r.ok) throw new Error("binance http "+r.status);
+  const j = await r.json();
+  if(!Array.isArray(j) || !j.length) throw new Error("binance payload");
+  return j.map(k => ({time:k[0], open:+k[1], high:+k[2], low:+k[3], close:+k[4]}));
+}
+async function binancePrices(){
+  const syms = encodeURIComponent(JSON.stringify(SYMBOLS));
+  const r = await fetch(`${BINANCE}/api/v3/ticker/price?symbols=${syms}`);
+  if(!r.ok) throw new Error("binance http "+r.status);
+  const j = await r.json();
+  const out = {};
+  for(const row of j){ const p = parseFloat(row.price); if(isFinite(p)) out[row.symbol] = p; }
+  return out;
+}
+function getKlines(s,i,l){ return SOURCE === "BITUNIX" ? bitunixKlines(s,i,l) : binanceKlines(s,i,l); }
+function getPrices(){ return SOURCE === "BITUNIX" ? bitunixPrices() : binancePrices(); }
+
+async function detectSource(){
+  try{ await bitunixKlines("LTCUSDT","3m",5); SOURCE = "BITUNIX"; }
+  catch(e){ SOURCE = "BINANCE"; }
+}
+
+/* ---------- Heikin-Ashi ---------- */
+function heikinAshi(candles){
+  const out = [];
+  for(let i=0;i<candles.length;i++){
+    const c = candles[i];
+    const close = (c.open + c.high + c.low + c.close) / 4;
+    const open = i === 0 ? (c.open + c.close) / 2 : (out[i-1].open + out[i-1].close) / 2;
+    out.push({ time:c.time, open, close,
+               high: Math.max(c.high, open, close),
+               low:  Math.min(c.low,  open, close) });
+  }
+  return out;
+}
+
+/* ---------- SIERRA — the three minute ----------
+   PUSHING = fresh ground on the 3M series (live price beyond the range of
+   the previous 3 closed HA candles, in the move's direction).
+   SLOWING only when BOTH latest closed HA candles are littler than BOTH
+   preceding ones AND no fresh ground was made. Fresh ground forces PUSHING.
+   BIG MOVE = fresh ground AND travel from the swing extreme of the last 40
+   closed candles past the coin's line (LTC $1.00 · BTC $1,000 · ETH $30). */
+function sierraRead(symbol, raw, live){
+  const ha = heikinAshi(raw);
+  const closed = ha.slice(0, -1);
+  const forming = ha[ha.length - 1];
+  const dirUp = live >= forming.open;
+  const prev3 = closed.slice(-3);
+  const hiRef = Math.max.apply(null, prev3.map(c => c.high));
+  const loRef = Math.min.apply(null, prev3.map(c => c.low));
+  const freshUp = live > hiRef, freshDown = live < loRef;
+  const n = closed.length;
+  const size = i => closed[i].high - closed[i].low;
+  const littler = Math.max(size(n-1), size(n-2)) < Math.min(size(n-3), size(n-4));
+  let army, word;
+  if(freshUp || freshDown){
+    army = freshUp ? "GREEN" : "RED";
+    const win = closed.slice(-40);
+    const travel = freshUp ? live - Math.min.apply(null, win.map(c => c.low))
+                           : Math.max.apply(null, win.map(c => c.high)) - live;
+    word = army + " ARMY PUSHING";
+    if(travel >= BIGMOVE[symbol]) word += freshUp ? " — BIG MOVE TO THE UPSIDE" : " — BIG MOVE TO THE DOWNSIDE";
+  } else if(littler){
+    army = dirUp ? "GREEN" : "RED";
+    word = army + " ARMY SLOWING";
+  } else {
+    army = dirUp ? "GREEN" : "RED";
+    word = army + " ARMY PUSHING";
+  }
+  return { army, word };
+}
+
+/* ---------- SABLE — the six hour spread ----------
+   Spread = live price − the forming 6H Heikin-Ashi candle's close value. */
+function bandWord(symbol, spread){
+  const a = Math.abs(spread);
+  switch(symbol){
+    case "LTCUSDT": return a < 0.30 ? "a weak move" : (a < 1.00 ? "A CYCLE" : "THE BIG MOVE");
+    case "BTCUSDT": return a < 300 ? "quiet" : a < 500 ? "A NICE CYCLE" : a < 800 ? "A MOVE" : a < 1000 ? "A BETTER MOVE" : "BIG BIG MOVE";
+    case "ETHUSDT": return a < 9 ? "quiet" : a < 15 ? "A CYCLE" : a < 30 ? "A MOVE" : "A BIG MOVE";
+    case "SOLUSDT": return a >= 2 ? "a nice move" : "quiet";
+    case "BCHUSDT": return a >= 30 ? "a nice move" : "quiet";
+    case "BNBUSDT": return a >= 2 ? "a good move" : "quiet";
+  }
+  return "quiet";
+}
+
+/* ---------- formatting ---------- */
+function fmtPrice(v){
+  return "$" + v.toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtSpread(symbol, spread){
+  const sign = spread >= 0 ? "+" : "−";
+  if(symbol === "LTCUSDT") return sign + Math.round(Math.abs(spread) * 100) + "¢";
+  return sign + "$" + Math.abs(spread).toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+const nycTime = new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York", hour:"numeric", minute:"2-digit", second:"2-digit", hour12:true});
+const nycClock = new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York", weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit", second:"2-digit", hour12:true});
+
+/* ---------- build Sable rows ---------- */
+const sableRows = {};
+(function(){
+  const wrap = document.getElementById("sable-rows");
+  for(const s of SYMBOLS){
+    const row = document.createElement("div");
+    row.className = "row"; row.id = "sable-" + s;
+    row.innerHTML = '<span class="rcoin"></span><span class="rprice">—</span>' +
+                    '<span class="rspread">—</span><span class="rband">—</span>' +
+                    (BIG3.includes(s) ? '<span class="rpush"></span>' : '');
+    row.querySelector(".rcoin").textContent = NAMES[s];
+    wrap.appendChild(row);
+    sableRows[s] = { row,
+      price: row.querySelector(".rprice"),
+      spread: row.querySelector(".rspread"),
+      band: row.querySelector(".rband"),
+      push: row.querySelector(".rpush") };
+  }
+})();
+
+/* ---------- render ---------- */
+const sierraState = {}; // symbol -> {word, timer}
+function renderSierra(symbol, read, live){
+  const cell = document.getElementById("sierra-" + symbol);
+  cell.querySelector(".price").textContent = fmtPrice(live);
+  cell.querySelector(".word").textContent = read.word;
+  cell.dataset.army = read.army;
+  const prev = sierraState[symbol];
+  if(!prev || prev.word !== read.word){
+    cell.classList.remove("flash-green","flash-red");
+    void cell.offsetWidth; // restart the flash
+    cell.classList.add(read.army === "GREEN" ? "flash-green" : "flash-red");
+    if(prev && prev.timer) clearTimeout(prev.timer);
+    const timer = setTimeout(() => cell.classList.remove("flash-green","flash-red"), 60000);
+    sierraState[symbol] = { word: read.word, timer };
+  }
+}
+function renderSable(symbol, live, spread, sierra){
+  const R = sableRows[symbol];
+  R.price.textContent = fmtPrice(live);
+  R.spread.textContent = fmtSpread(symbol, spread);
+  R.spread.className = "rspread " + (spread >= 0 ? "pos" : "neg");
+  R.band.textContent = bandWord(symbol, spread);
+  if(R.push && sierra){
+    R.push.innerHTML = '<span class="plabel">3M PUSH&nbsp;&nbsp;</span>' +
+      sierra.word.replace(/^(GREEN|RED) ARMY /, "");
+    R.push.className = "rpush " + sierra.army;
+  }
+}
+
+/* ---------- clock ---------- */
+function tickClock(){
+  document.getElementById("clock").textContent = nycClock.format(new Date()) + " · NYC";
+}
+setInterval(tickClock, 1000); tickClock();
+
+/* ---------- poll ---------- */
+const statusEl = document.getElementById("status");
+let fellBack = false;
+async function poll(){
+  try{
+    if(!SOURCE) await detectSource();
+    const prices = await getPrices();
+    const jobs = [];
+    for(const s of BIG3) jobs.push(getKlines(s, "3m", 120).then(k => ({kind:"3m", s, k})));
+    for(const s of SYMBOLS) jobs.push(getKlines(s, "6h", 60).then(k => ({kind:"6h", s, k})));
+    const res = await Promise.all(jobs);
+    const k3 = {}, k6 = {};
+    for(const r of res){ if(r.kind === "3m") k3[r.s] = r.k; else k6[r.s] = r.k; }
+    const reads = {};
+    for(const s of BIG3){
+      if(prices[s] != null && k3[s]){ reads[s] = sierraRead(s, k3[s], prices[s]); renderSierra(s, reads[s], prices[s]); }
+    }
+    for(const s of SYMBOLS){
+      if(prices[s] != null && k6[s]){
+        const ha6 = heikinAshi(k6[s]);
+        const candlePrice = ha6[ha6.length - 1].close;
+        renderSable(s, prices[s], prices[s] - candlePrice, reads[s] || null);
+      }
+    }
+    statusEl.textContent = "● LIVE — " + SOURCE + " · UPDATED " + nycTime.format(new Date()) + " NYC";
+  }catch(e){
+    if(SOURCE === "BITUNIX" && !fellBack){ fellBack = true; SOURCE = "BINANCE"; return poll(); }
+    statusEl.textContent = "RECONNECTING TO THE TAPE…";
+  }
+}
+poll();
+setInterval(poll, POLL_MS);
+</script>
+</body>
+</html>
