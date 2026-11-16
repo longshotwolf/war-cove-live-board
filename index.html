@@ -206,21 +206,32 @@ function sierraRead(symbol, raw, live){
   const n = closed.length;
   const size = i => closed[i].high - closed[i].low;
   const littler = Math.max(size(n-1), size(n-2)) < Math.min(size(n-3), size(n-4));
-  let army, word;
+  let state, army = dirUp ? "GREEN" : "RED", bigDir = null;
   if(freshUp || freshDown){
+    state = "PUSHING";
     army = freshUp ? "GREEN" : "RED";
     const win = closed.slice(-40);
     const travel = freshUp ? live - Math.min.apply(null, win.map(c => c.low))
                            : Math.max.apply(null, win.map(c => c.high)) - live;
-    word = army + " ARMY PUSHING";
-    if(travel >= BIGMOVE[symbol]) word += freshUp ? " — BIG MOVE TO THE UPSIDE" : " — BIG MOVE TO THE DOWNSIDE";
+    if(travel >= BIGMOVE[symbol]) bigDir = freshUp ? "UP" : "DOWN";
   } else if(littler){
-    army = dirUp ? "GREEN" : "RED";
-    word = army + " ARMY SLOWING";
+    state = "SLOWING";
   } else {
-    army = dirUp ? "GREEN" : "RED";
-    word = army + " ARMY PUSHING";
+    state = "PUSHING";
   }
+  return { state, army, bigDir };
+}
+
+/* AGREEMENT RULE: when the 6H spread is at cycle size or beyond, the push
+   read carries the spread's army — cycle down is red army on both reads,
+   cycle up is green army on both. The two reads never contradict. */
+const CYCLE_LINE = { LTCUSDT: 0.30, BTCUSDT: 300, ETHUSDT: 9 };
+function composeWord(symbol, read, spread){
+  let army = read.army;
+  if(spread != null && Math.abs(spread) >= CYCLE_LINE[symbol])
+    army = spread >= 0 ? "GREEN" : "RED";
+  let word = army + " ARMY " + read.state;
+  if(read.bigDir) word += army === "GREEN" ? " — BIG MOVE TO THE UPSIDE" : " — BIG MOVE TO THE DOWNSIDE";
   return { army, word };
 }
 
@@ -320,16 +331,22 @@ async function poll(){
     const res = await Promise.all(jobs);
     const k3 = {}, k6 = {};
     for(const r of res){ if(r.kind === "3m") k3[r.s] = r.k; else k6[r.s] = r.k; }
-    const reads = {};
-    for(const s of BIG3){
-      if(prices[s] != null && k3[s]){ reads[s] = sierraRead(s, k3[s], prices[s]); renderSierra(s, reads[s], prices[s]); }
-    }
+    const spreads = {};
     for(const s of SYMBOLS){
       if(prices[s] != null && k6[s]){
         const ha6 = heikinAshi(k6[s]);
-        const candlePrice = ha6[ha6.length - 1].close;
-        renderSable(s, prices[s], prices[s] - candlePrice, reads[s] || null);
+        spreads[s] = prices[s] - ha6[ha6.length - 1].close;
       }
+    }
+    const reads = {};
+    for(const s of BIG3){
+      if(prices[s] != null && k3[s]){
+        reads[s] = composeWord(s, sierraRead(s, k3[s], prices[s]), spreads[s]);
+        renderSierra(s, reads[s], prices[s]);
+      }
+    }
+    for(const s of SYMBOLS){
+      if(spreads[s] != null) renderSable(s, prices[s], spreads[s], reads[s] || null);
     }
     statusEl.textContent = "● LIVE — " + SOURCE + " · UPDATED " + nycTime.format(new Date()) + " NYC";
   }catch(e){
