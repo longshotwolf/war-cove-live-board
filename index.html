@@ -76,6 +76,42 @@
   .rpush{margin-left:auto; font-weight:800; font-size:13.5px; letter-spacing:.05em; text-align:right;}
   .rpush.GREEN{color:var(--green);} .rpush.RED{color:var(--red);}
   .rpush .plabel{color:#7fd8ab; font-weight:600; letter-spacing:.14em; font-size:11.5px;}
+  /* ---------- TEMP BOX — Terra bottoms / Vega tops ---------- */
+  .tempsec{border-radius:14px; padding:12px 10px 14px; transition:box-shadow .4s;}
+  .tempsec.glow-b{box-shadow:0 0 26px rgba(251,113,133,.35), inset 0 0 34px rgba(251,113,133,.08);}
+  .tempsec.glow-t{box-shadow:0 0 26px rgba(34,255,136,.35), inset 0 0 34px rgba(34,255,136,.08);}
+  .tempbar{
+    min-height:26px; border-radius:8px; margin-bottom:10px; padding:5px 10px;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+    text-align:center; font-size:12.5px; font-weight:800; letter-spacing:.16em; color:#5f7a6a;
+    transition:background .3s, box-shadow .3s, color .3s;
+  }
+  .tempbar.lit-b{background:linear-gradient(90deg, rgba(251,113,133,.25), rgba(251,113,133,.7), rgba(251,113,133,.25)); box-shadow:0 0 16px rgba(251,113,133,.6); color:#ffe3e8;}
+  .tempbar.lit-t{background:linear-gradient(90deg, rgba(34,255,136,.22), rgba(34,255,136,.65), rgba(34,255,136,.22)); box-shadow:0 0 16px rgba(34,255,136,.55); color:#eafff2;}
+  .tempwrap{overflow-x:auto;}
+  .tgrid{display:grid; grid-template-columns:80px repeat(5, minmax(108px,1fr)); gap:7px; min-width:660px;}
+  .thead{
+    font-size:11.5px; font-weight:800; letter-spacing:.18em; color:#7fd8ab;
+    text-align:center; padding:6px 2px;
+  }
+  .tcoin{
+    display:flex; align-items:center; font-weight:800; letter-spacing:.1em;
+    color:#b9ffd6; font-size:13.5px; padding:0 4px;
+  }
+  .tcell{
+    background:var(--panel); border:1.5px solid rgba(57,255,176,.35); border-radius:9px;
+    padding:8px 7px 9px; text-align:center; transition:border-color .3s;
+  }
+  .tcell .tlvl{font-size:15.5px; font-weight:800; font-variant-numeric:tabular-nums; color:#fff;}
+  .tcell .tstate{margin-top:4px; font-size:11px; font-weight:800; letter-spacing:.08em; color:#8fb8a2; line-height:1.35; min-height:2.6em;}
+  .tcell .trec{margin-top:3px; font-size:10.5px; font-weight:600; color:#a9c9b6; font-variant-numeric:tabular-nums; line-height:1.35;}
+  .tcell.through .tstate{color:#ffb3ab;}
+  @keyframes flashRose{0%,100%{background:rgba(251,113,133,.10);}50%{background:rgba(251,113,133,.48);}}
+  @keyframes flashEm{0%,100%{background:rgba(34,255,136,.08);}50%{background:rgba(34,255,136,.48);}}
+  .tcell.lit-b{animation:flashRose .9s ease-in-out infinite; border-color:rgba(251,113,133,.9);}
+  .tcell.lit-b .tstate{color:#ffd9de;}
+  .tcell.lit-t{animation:flashEm .9s ease-in-out infinite; border-color:rgba(34,255,136,.9);}
+  .tcell.lit-t .tstate{color:#d9ffe9;}
   footer{
     margin-top:20px; padding-top:12px; border-top:1px solid rgba(57,255,176,.35);
     text-align:center; font-size:12.5px; letter-spacing:.2em; color:#7fd8ab;
@@ -114,6 +150,18 @@
   <section>
     <h2>SABLE — READING THE SIX HOUR SPREAD</h2>
     <div class="rows" id="sable-rows"></div>
+  </section>
+
+  <section class="tempsec" id="temp-terra">
+    <h2>TERRA — TEMP BOTTOMS</h2>
+    <div class="tempbar" id="terra-bar">NO BOTTOM HIT LIT</div>
+    <div class="tempwrap"><div class="tgrid" id="terra-grid"></div></div>
+  </section>
+
+  <section class="tempsec" id="temp-vega">
+    <h2>VEGA — TEMP TOPS</h2>
+    <div class="tempbar" id="vega-bar">NO TOP HIT LIT</div>
+    <div class="tempwrap"><div class="tgrid" id="vega-grid"></div></div>
   </section>
 
   <footer>WAR COVE LIVE BOARD · NEW YORK TIME · READS LIVE OFF THE TAPE</footer>
@@ -356,6 +404,175 @@ async function poll(){
 }
 poll();
 setInterval(poll, POLL_MS);
+
+/* ---------- TEMP BOX — TERRA temp bottoms / VEGA temp tops ----------
+   Reader only: this box reads and displays, nothing else. Every number is
+   computed here in the visitor's own browser off the Binance public feed —
+   no house server, no house feed files.
+   Each frame's level rides the FORMING Heikin-Ashi candle: bottom level =
+   its low extreme, top level = its high extreme. A fresh extension of the
+   extreme is a new hit and fires once per level; a standing level never
+   re-fires; a candle roll starts clean.
+   LIGHT LAW: a light means price is on the level NOW, plus a full 60-second
+   flashing hold after a hit or a bounce off the point. Once price is off
+   the point and the 60 seconds run out, every glow goes out. The hit record
+   (price · NYC time · count) stays on screen as plain unlit text. */
+const FRAMES = [
+  {key:"MONTH", iv:"1M"}, {key:"WEEK", iv:"1w"}, {key:"DAY", iv:"1d"},
+  {key:"4H", iv:"4h"}, {key:"6H", iv:"6h"}
+];
+const HIT_BAND = 0.0015;    // hit while within 0.15% of the level
+const PIERCE_BAND = 0.0005; // more than 0.05% through it = through
+const TEMP_FLASH_MS = 60000;
+
+const tempCells = {}; // "bottom|LTCUSDT|MONTH" -> cell record
+(function buildTempGrids(){
+  for(const side of ["bottom","top"]){
+    const grid = document.getElementById(side === "bottom" ? "terra-grid" : "vega-grid");
+    const corner = document.createElement("div");
+    corner.className = "thead"; corner.textContent = "COIN";
+    grid.appendChild(corner);
+    for(const f of FRAMES){
+      const h = document.createElement("div");
+      h.className = "thead"; h.textContent = f.key;
+      grid.appendChild(h);
+    }
+    for(const s of SYMBOLS){
+      const c = document.createElement("div");
+      c.className = "tcoin"; c.textContent = NAMES[s];
+      grid.appendChild(c);
+      for(const f of FRAMES){
+        const el = document.createElement("div");
+        el.className = "tcell";
+        el.innerHTML = '<div class="tlvl">—</div><div class="tstate">READING…</div><div class="trec"></div>';
+        grid.appendChild(el);
+        tempCells[side + "|" + s + "|" + f.key] = {
+          side, symbol:s, frame:f.key, el,
+          lvlEl: el.querySelector(".tlvl"),
+          stateEl: el.querySelector(".tstate"),
+          recEl: el.querySelector(".trec"),
+          candleTime:null, level:null, record:null,
+          state:null, flashUntil:0
+        };
+      }
+    }
+  }
+})();
+
+function tempHitState(side, live, level){
+  if(side === "bottom"){
+    if(live < level * (1 - PIERCE_BAND)) return {state:"through"};
+    if(live <= level * (1 + HIT_BAND)) return {state:"hit"};
+    return {state:"clear", dist:(live - level) / level * 100};
+  }
+  if(live > level * (1 + PIERCE_BAND)) return {state:"through"};
+  if(live >= level * (1 - HIT_BAND)) return {state:"hit"};
+  return {state:"clear", dist:(level - live) / level * 100};
+}
+function tempFireHit(cell, level){
+  cell.record = {
+    price: level,
+    time: new Date(),
+    count: cell.record ? cell.record.count + 1 : 1
+  };
+  cell.flashUntil = Date.now() + TEMP_FLASH_MS;
+}
+function tempEvaluate(cell, candles, live){
+  const ha = heikinAshi(candles);
+  const forming = ha[ha.length - 1];
+  const candleTime = candles[candles.length - 1].time;
+  if(cell.candleTime !== candleTime){ // candle roll starts clean
+    cell.candleTime = candleTime;
+    cell.level = null; cell.record = null;
+    cell.state = null; cell.flashUntil = 0;
+  }
+  const extreme = cell.side === "bottom" ? forming.low : forming.high;
+  if(cell.level === null){
+    cell.level = extreme;
+    // price sitting on the standing level when first read = the hit stands
+    if(tempHitState(cell.side, live, extreme).state === "hit") tempFireHit(cell, extreme);
+  } else if(extreme !== cell.level){
+    cell.level = extreme; // fresh extension of the extreme = a new hit
+    tempFireHit(cell, extreme);
+  }
+  const now = Date.now();
+  const res = tempHitState(cell.side, live, cell.level);
+  if(cell.state === "hit" && res.state !== "hit" && cell.flashUntil < now + TEMP_FLASH_MS)
+    cell.flashUntil = now + TEMP_FLASH_MS; // bounce off the point: hold the flash
+  cell.state = res.state;
+  cell.dist = res.dist;
+  cell.lit = res.state === "hit" || now < cell.flashUntil;
+}
+function tempRenderCell(cell){
+  cell.lvlEl.textContent = fmtPrice(cell.level);
+  if(cell.state === "through"){
+    cell.stateEl.textContent = "THROUGH — NOT HOLDING";
+    cell.el.classList.add("through");
+  } else if(cell.state === "hit"){
+    cell.stateEl.textContent = cell.side === "bottom" ? "BOTTOM HIT — PRICE ON IT" : "TOP HIT — PRICE ON IT";
+    cell.el.classList.remove("through");
+  } else {
+    cell.stateEl.textContent = cell.dist != null ? cell.dist.toFixed(2) + "% AWAY" : "—";
+    cell.el.classList.remove("through");
+  }
+  cell.recEl.textContent = cell.record
+    ? "✓ Hit " + fmtPrice(cell.record.price) + " · " + nycTime.format(cell.record.time) + " NYC · ×" + cell.record.count
+    : "";
+  cell.el.classList.toggle("lit-b", cell.side === "bottom" && !!cell.lit);
+  cell.el.classList.toggle("lit-t", cell.side === "top" && !!cell.lit);
+}
+function tempRenderSideLights(){
+  for(const side of ["bottom","top"]){
+    let litCell = null;
+    for(const k in tempCells){
+      const c = tempCells[k];
+      if(c.side !== side) continue;
+      c.lit = c.state === "hit" || Date.now() < c.flashUntil;
+      c.el.classList.toggle("lit-b", side === "bottom" && c.lit);
+      c.el.classList.toggle("lit-t", side === "top" && c.lit);
+      if(c.lit && (!litCell || (c.record && litCell.record && c.record.time > litCell.record.time))) litCell = c;
+    }
+    const sec = document.getElementById(side === "bottom" ? "temp-terra" : "temp-vega");
+    const bar = document.getElementById(side === "bottom" ? "terra-bar" : "vega-bar");
+    sec.classList.toggle("glow-b", side === "bottom" && !!litCell);
+    sec.classList.toggle("glow-t", side === "top" && !!litCell);
+    bar.classList.toggle("lit-b", side === "bottom" && !!litCell);
+    bar.classList.toggle("lit-t", side === "top" && !!litCell);
+    bar.textContent = litCell
+      ? "💡 " + (side === "bottom" ? "BOTTOM" : "TOP") + " HIT LIT — " + NAMES[litCell.symbol] + " " + litCell.frame
+      : (side === "bottom" ? "NO BOTTOM HIT LIT" : "NO TOP HIT LIT");
+  }
+}
+
+const tempKlineCache = {}; // "LTCUSDT|1M" -> candles
+async function tempFetchKlines(){
+  const jobs = [];
+  for(const s of SYMBOLS) for(const f of FRAMES){
+    jobs.push(binanceKlines(s, f.iv, 100)
+      .then(k => { tempKlineCache[s + "|" + f.iv] = k; })
+      .catch(() => {}));
+  }
+  await Promise.all(jobs);
+}
+async function tempTick(){
+  try{
+    const prices = await binancePrices();
+    for(const k in tempCells){
+      const cell = tempCells[k];
+      const iv = FRAMES.find(f => f.key === cell.frame).iv;
+      const candles = tempKlineCache[cell.symbol + "|" + iv];
+      if(candles && candles.length > 1 && prices[cell.symbol] != null){
+        tempEvaluate(cell, candles, prices[cell.symbol]);
+        tempRenderCell(cell);
+      }
+    }
+    tempRenderSideLights();
+  }catch(e){ /* next tick retries; the board's main status line reports feed trouble */ }
+}
+tempFetchKlines().then(tempTick);
+setInterval(tempFetchKlines, 30000);
+setInterval(tempTick, 5000);
+setInterval(tempRenderSideLights, 1000); // the 60-second holds expire on time
 </script>
 </body>
 </html>
