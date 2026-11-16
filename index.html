@@ -127,6 +127,57 @@
   .fpline.onp{background:rgba(255,233,168,.16); border-radius:5px;}
   .fpstate{margin-top:6px; font-size:11.5px; font-weight:900; letter-spacing:.1em; line-height:1.35; min-height:2.4em;}
   .fpstate.GREEN{color:var(--green);} .fpstate.RED{color:var(--red);}
+  /* ---------- bot desks — portrait · name · job · grade record ---------- */
+  .desk{
+    display:flex; gap:12px; align-items:center;
+    background:var(--panel); border:1.5px solid var(--line); border-radius:12px;
+    padding:10px 12px; margin-bottom:12px; text-align:left;
+    box-shadow:inset 0 0 22px rgba(57,255,176,.06);
+  }
+  .desk img{
+    width:84px; height:96px; object-fit:cover; object-position:top center;
+    border-radius:9px; border:1.5px solid var(--line); flex:none; display:block;
+  }
+  .desk.leader img{width:112px; height:128px;}
+  .desk .dname{font-size:clamp(20px,4.2vw,29px); font-weight:900; letter-spacing:.14em; color:#fff; line-height:1.1;}
+  .desk .djob{margin-top:3px; font-size:12.5px; font-weight:700; letter-spacing:.18em; color:#8dffc0; text-transform:uppercase;}
+  .desk .dgrade{margin-top:5px; font-size:12.5px; color:#a9c9b6; line-height:1.5;}
+  .desk .dgrade b{color:#ffe9a8;}
+  .desks2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:4px;}
+  @media (max-width:680px){ .desks2{grid-template-columns:1fr;} }
+  .desks2 .desk{margin-bottom:0;}
+  /* ---------- still offices — treasury · broadcast · production ---------- */
+  .pots{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  @media (max-width:680px){ .pots{grid-template-columns:1fr;} }
+  .pot{
+    background:var(--panel); border:1.5px solid var(--line); border-radius:12px;
+    padding:16px 12px 18px; text-align:center;
+    box-shadow:inset 0 0 22px rgba(57,255,176,.06);
+  }
+  .pot .pname{font-size:15px; letter-spacing:.24em; font-weight:700; color:#b9ffd6;}
+  .pot .pstate{
+    margin-top:10px; font-size:clamp(18px,3.8vw,26px); font-weight:900; letter-spacing:.05em;
+    color:#ffe9a8; line-height:1.3;
+  }
+  .pot .pnote{margin-top:8px; font-size:12.5px; color:#a9c9b6; line-height:1.5;}
+  .orow{
+    display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px;
+    background:var(--panel); border:1.5px solid rgba(57,255,176,.4); border-radius:10px;
+    padding:11px 14px;
+  }
+  .olabel{font-weight:800; letter-spacing:.14em; min-width:210px; color:#b9ffd6; font-size:14px;}
+  .ovalue{font-weight:600; font-size:14.5px; color:#e8fff2; line-height:1.45;}
+  .ovalue b{color:#ffe9a8;}
+  .offstate{font-weight:900; color:var(--red); letter-spacing:.08em;}
+  .addr{font-variant-numeric:tabular-nums; word-break:break-all; color:#8dffc0; font-weight:700; font-size:14.5px;}
+  .office-note{
+    margin-top:9px; text-align:center; font-size:12px; letter-spacing:.14em; color:#7fd8ab;
+    text-transform:uppercase; line-height:1.7;
+  }
+  .subhead{
+    margin:14px 0 8px; text-align:center; font-size:12.5px; font-weight:800;
+    letter-spacing:.26em; color:#7fd8ab;
+  }
   /* ---------- embeds ---------- */
   .embedwrap iframe{
     width:100%; border:1.5px solid var(--line); border-radius:12px; background:#000; display:block;
@@ -147,10 +198,22 @@
 <div class="frame">
   <header>
     <h1>WAR COVE LIVE BOARD</h1>
-    <div id="sub">FULL BOARD · EVERY PANEL WORKING · READER ONLY</div>
+    <div id="sub">FULL BOARD · THE WHOLE FLOOR AT THEIR DESKS · READER ONLY</div>
     <div id="clock">— NYC</div>
     <div id="status">READING THE TAPE…</div>
   </header>
+
+  <section>
+    <h2>THE FRONT DESK — PRESIDENT</h2>
+    <div class="desk leader">
+      <img src="bots/sheity.webp" alt="Sheity at the front desk">
+      <div>
+        <div class="dname">SHEITY</div>
+        <div class="djob">President — Front Desk · Presents the Day</div>
+        <div class="dgrade">Grade record: <b>no machine grade</b> — the front desk is graded by the Warlord's eyes. Still portrait: she is here to be seen and read — no live line, nothing connects, nothing operates.</div>
+      </div>
+    </div>
+  </section>
 
   <section>
     <h2>THE MARKET — LIVE PRICES</h2>
@@ -159,35 +222,149 @@
 
   <section>
     <h2>6H SPREAD — READING THE SIX HOUR</h2>
+    <div class="desk">
+      <img src="bots/sable.webp" alt="Sable at her desk">
+      <div>
+        <div class="dname">SABLE</div>
+        <div class="djob">Spread Watch — The Six Hour Spread</div>
+        <div class="dgrade">Grade record: doctrine test <b>passed clean</b> · QC sweep <b>55/55</b>.</div>
+      </div>
+    </div>
     <div class="rows" id="spread-rows"></div>
   </section>
 
   <section>
     <h2>3M SURVEY — READING THE THREE MINUTE</h2>
+    <div class="desk">
+      <img src="bots/sierra.webp" alt="Sierra at her desk">
+      <div>
+        <div class="dname">SIERRA</div>
+        <div class="djob">Survey — The Three Minute</div>
+        <div class="dgrade">Grade record: graded lane test <b>944/954</b> · QC sweep <b>113/113</b>.</div>
+      </div>
+    </div>
     <div class="grid3" id="survey-grid"></div>
   </section>
 
   <section class="tempsec" id="temp-bottoms">
     <h2>TEMP BOTTOMS</h2>
+    <div class="desk">
+      <img src="bots/terra.webp" alt="Terra at her desk">
+      <div>
+        <div class="dname">TERRA</div>
+        <div class="djob">Temp Watcher — Bottoms</div>
+        <div class="dgrade">Grade record: doctrine test <b>24/24</b> · QC sweep <b>24/24</b>.</div>
+      </div>
+    </div>
     <div class="tempbar" id="bot-bar">NO BOTTOM HIT LIT</div>
     <div class="tempwrap"><div class="tgrid" id="bot-grid"></div></div>
   </section>
 
   <section class="tempsec" id="temp-tops">
     <h2>TEMP TOPS</h2>
+    <div class="desk">
+      <img src="bots/vega.webp" alt="Vega at her desk">
+      <div>
+        <div class="dname">VEGA</div>
+        <div class="djob">Temp Watcher — Tops</div>
+        <div class="dgrade">Grade record: doctrine test <b>24/24</b> · QC sweep <b>34/34</b>.</div>
+      </div>
+    </div>
     <div class="tempbar" id="top-bar">NO TOP HIT LIT</div>
     <div class="tempwrap"><div class="tgrid" id="top-grid"></div></div>
   </section>
 
   <section class="tempsec" id="temp-one">
     <h2>ONE MINUTE — TEMP WATCH</h2>
+    <div class="desk">
+      <img src="bots/mina.webp" alt="Mina at her desk">
+      <div>
+        <div class="dname">MINA</div>
+        <div class="djob">One Minute — Temp Watch</div>
+        <div class="dgrade">Grade record: <b>still building</b>.</div>
+      </div>
+    </div>
     <div class="tempbar" id="one-bar">NO 1M HIT LIT</div>
     <div class="tempwrap"><div class="tgrid onegrid" id="one-grid"></div></div>
   </section>
 
   <section>
     <h2>FOUR POINTS — THE BIG 3</h2>
+    <div class="desk">
+      <img src="bots/nova.webp" alt="Nova at her desk">
+      <div>
+        <div class="dname">NOVA</div>
+        <div class="djob">Four Points Watcher — The Big 3</div>
+        <div class="dgrade">Grade record: doctrine test caught <b>3 false prices</b> on her watch — fix in progress. The points below are read live off the chart in your own browser.</div>
+      </div>
+    </div>
     <div class="tempwrap" id="fp-wrap"></div>
+  </section>
+
+  <section>
+    <h2>TREASURY — THE MONEY TILL</h2>
+    <div class="pots">
+      <div class="pot"><div class="pname">REPLICATE</div><div class="pstate">NOT CONFIRMED YET</div><div class="pnote">Clip and promo creation pot. The balance shows only what the Warlord confirms — amount, status, date.</div></div>
+      <div class="pot"><div class="pname">SIMLI</div><div class="pstate">NOT CONFIRMED YET</div><div class="pnote">Live face pot. The balance shows only what the Warlord confirms — amount, status, date.</div></div>
+      <div class="pot"><div class="pname">LUMA</div><div class="pstate">NOT CONFIRMED YET</div><div class="pnote">Restyle pot. The balance shows only what the Warlord confirms — amount, status, date.</div></div>
+    </div>
+    <div class="office-note">Three separate pots — nothing transfers between them · Read only</div>
+  </section>
+
+  <section>
+    <h2>BROADCAST — STREAM DAY</h2>
+    <div class="desks2">
+      <div class="desk">
+        <img src="bots/bella.webp" alt="Bella at her desk">
+        <div>
+          <div class="dname">BELLA</div>
+          <div class="djob">Open Announcer — The Stock Open Call</div>
+          <div class="dgrade">Grade record: doctrine test <b>passed clean</b> · three checks from the bell.</div>
+        </div>
+      </div>
+      <div class="desk">
+        <img src="bots/stella.webp" alt="Stella at her desk">
+        <div>
+          <div class="dname">STELLA</div>
+          <div class="djob">Close Announcer — The Stock Close Call</div>
+          <div class="dgrade">Grade record: doctrine test <b>passed clean</b> · three checks from the bell.</div>
+        </div>
+      </div>
+    </div>
+    <div class="subhead">GO-LIVE CHECKLIST</div>
+    <div class="rows">
+      <div class="orow"><span class="olabel">STREAM SEATS</span><span class="ovalue">Set — the final seats are listed below</span></div>
+      <div class="orow"><span class="olabel">OPEN ANNOUNCER</span><span class="ovalue">Checks <b>three times in a row</b> from the 9:30 AM ET bell and posts on the first check that confirms all seven tickers</span></div>
+      <div class="orow"><span class="olabel">CLOSE ANNOUNCER</span><span class="ovalue">Checks <b>three times in a row</b> from the 4:00 PM ET bell — same rule</span></div>
+      <div class="orow"><span class="olabel">KICKBOT COMMANDS</span><span class="ovalue"><b>LIVE</b> — !discord · !youtube · !tiktok · !x · !tip · !proof · !record</span></div>
+      <div class="orow"><span class="olabel">KICKBOT TIMERS</span><span class="ovalue"><b>LIVE</b> — the proof and record timer posts the house Proof Page link</span></div>
+      <div class="orow"><span class="olabel">TEXT-TO-SPEECH</span><span class="ovalue"><b>ON</b> for everyone — links are never read aloud</span></div>
+      <div class="orow"><span class="olabel">BRANDED CONTENT</span><span class="ovalue"><span class="offstate">OFF</span> — stays off until a paid ad is in rotation</span></div>
+    </div>
+    <div class="subhead">THE FINAL STREAM SEATS</div>
+    <div class="rows">
+      <div class="orow"><span class="olabel">DAY BRIEF</span><span class="ovalue">Sits in the paper game's old seat</span></div>
+      <div class="orow"><span class="olabel">PAPER GAME</span><span class="ovalue">Sits in the Kick chat seat</span></div>
+      <div class="orow"><span class="olabel">KICK CHAT</span><span class="ovalue">Off the screen</span></div>
+      <div class="orow"><span class="olabel">WAR COVE NEWS</span><span class="ovalue">Runs as its own browser source — address below</span></div>
+    </div>
+    <div class="subhead">BROWSER SOURCES</div>
+    <div class="rows">
+      <div class="orow"><span class="olabel">WAR COVE NEWS</span><span class="addr">https://longshotwolf.github.io/war-cove-newsroom/</span></div>
+      <div class="orow"><span class="olabel">PAPER GAME — STREAM VIEW</span><span class="addr">https://longshotwolf.github.io/war-cove-board/?view=stream</span></div>
+      <div class="orow"><span class="olabel">BATTLEFIELD</span><span class="addr">https://longshotwolf.github.io/war-cove-battlefield/</span></div>
+    </div>
+    <div class="office-note">Still displays — nothing on this board can be pressed or changed · Read only</div>
+  </section>
+
+  <section>
+    <h2>PRODUCTION QUEUE</h2>
+    <div class="rows">
+      <div class="orow"><span class="olabel">GROUP AD — THE CREW AT THEIR DESKS</span><span class="ovalue">Stage: <b>PARKED</b> · Lane: REPLICATE · Credit needed: REPLICATE CREDIT · State: APPROVED — fires on the Warlord's word once the credit shows</span></div>
+      <div class="orow"><span class="olabel">LIONELL DOCUMENTARY — FILMED VERSION</span><span class="ovalue">Stage: <b>PENDING FUNDING</b> · Lane: REPLICATE · Credit needed: REPLICATE CREDIT · State: SCRIPT SET — the filmed build waits on funding</span></div>
+      <div class="orow"><span class="olabel">MARGEX +425.43% AD</span><span class="ovalue">Stage: <b>BUILT — QC PASSED</b> · Lane: HOUSE LANES · Credit needed: NONE · State: ON HOLD by the Warlord's word</span></div>
+    </div>
+    <div class="office-note">Finished pieces feed the Newsroom only · Read only</div>
   </section>
 
   <section>
@@ -198,17 +375,33 @@
 
   <section>
     <h2>THE PROOF PAGE — THE GRADED RECORD</h2>
+    <div class="desk">
+      <div>
+        <div class="dname">PRUDENCE</div>
+        <div class="djob">Proof Page Auditor — Records &amp; Quality</div>
+        <div class="dgrade">Grade record: her 30-minute QC sweep runs the whole floor — <b>first full run clean</b>. She corrects band words herself; prices, grades, quotes and times never change.</div>
+      </div>
+    </div>
     <div class="embedwrap"><iframe src="https://longshotwolf.github.io/war-cove-proof-page/" loading="lazy" title="War Cove Proof Page" style="height:560px;"></iframe></div>
     <a class="openlink" href="https://longshotwolf.github.io/war-cove-proof-page/" target="_blank" rel="noopener">OPEN THE PROOF PAGE ↗</a>
   </section>
 
   <section>
     <h2>WAR COVE PAPER GAME</h2>
+    <div class="desk">
+      <img src="bots/felicity.webp" alt="Felicity at her desk">
+      <div>
+        <div class="dname">FELICITY</div>
+        <div class="djob">Paper Game — Runs the Game from the Kick Chat</div>
+        <div class="dgrade">Grade record: doctrine test <b>passed clean</b>.</div>
+      </div>
+    </div>
     <div class="embedwrap"><iframe src="https://longshotwolf.github.io/war-cove-board/" loading="lazy" title="War Cove Paper Game" style="height:560px;"></iframe></div>
     <a class="openlink" href="https://longshotwolf.github.io/war-cove-board/" target="_blank" rel="noopener">OPEN THE PAPER GAME ↗</a>
   </section>
 
   <footer>WAR COVE LIVE BOARD · NEW YORK TIME<br>
+  THE FLOOR IS HERE TO BE SEEN AND READ — STILL PORTRAITS ONLY, NO LIVE LINES, NO CONTROLS<br>
   READS LIVE OFF THE BINANCE PUBLIC FEED — THE HOUSE FALLBACK FEED, NAMED PLAIN:<br>
   THE HOUSE TAPE SENDS NO BROWSER PERMISSION, SO THIS BOARD RUNS ON BINANCE</footer>
 </div>
