@@ -289,6 +289,78 @@
   </section>
 
   <section>
+    <h2>1H SURVEY — READING THE ONE HOUR</h2>
+    <div class="desk">
+      <div>
+        <div class="dname">HERA</div>
+        <div class="djob">Survey — The One Hour</div>
+        <div class="dgrade">Grade record: <b>still building</b>.</div>
+      </div>
+    </div>
+    <div class="grid3" id="tf-grid-1H"></div>
+  </section>
+
+  <section>
+    <h2>4H SURVEY — READING THE FOUR HOUR</h2>
+    <div class="desk">
+      <div>
+        <div class="dname">CORA</div>
+        <div class="djob">Survey — The Four Hour</div>
+        <div class="dgrade">Grade record: <b>still building</b>.</div>
+      </div>
+    </div>
+    <div class="grid3" id="tf-grid-4H"></div>
+  </section>
+
+  <section>
+    <h2>6H SURVEY — READING THE SIX HOUR</h2>
+    <div class="desk">
+      <div>
+        <div class="dname">JUNO</div>
+        <div class="djob">Survey — The Six Hour</div>
+        <div class="dgrade">Grade record: <b>still building</b>.</div>
+      </div>
+    </div>
+    <div class="grid3" id="tf-grid-6H"></div>
+  </section>
+
+  <section>
+    <h2>DAY SURVEY — READING THE DAY</h2>
+    <div class="desk">
+      <div>
+        <div class="dname">DIA</div>
+        <div class="djob">Survey — The Day</div>
+        <div class="dgrade">Grade record: <b>still building</b>.</div>
+      </div>
+    </div>
+    <div class="grid3" id="tf-grid-DAY"></div>
+  </section>
+
+  <section>
+    <h2>WEEK SURVEY — READING THE WEEK</h2>
+    <div class="desk">
+      <div>
+        <div class="dname">SELA</div>
+        <div class="djob">Survey — The Week</div>
+        <div class="dgrade">Grade record: <b>still building</b>.</div>
+      </div>
+    </div>
+    <div class="grid3" id="tf-grid-WEEK"></div>
+  </section>
+
+  <section>
+    <h2>MONTH SURVEY — READING THE MONTH</h2>
+    <div class="desk">
+      <div>
+        <div class="dname">MONA</div>
+        <div class="djob">Survey — The Month</div>
+        <div class="dgrade">Grade record: <b>still building</b>.</div>
+      </div>
+    </div>
+    <div class="grid3" id="tf-grid-MONTH"></div>
+  </section>
+
+  <section>
     <h2>FOUR POINTS — THE BIG 3</h2>
     <div class="desk">
       <img src="bots/nova.webp" alt="Nova at her desk">
@@ -939,6 +1011,83 @@ function fpRender(prices){
     cell.stateEl.className = "fpstate " + fp.holder;
   }
 }
+
+/* ---------- TIMEFRAME SURVEYS — 1H · 4H · 6H · DAY · WEEK · MONTH ----------
+   Hera · Cora · Juno · Dia · Sela · Mona. Each reads her own timeframe
+   exactly the way Sierra reads the three minute: price vs the forming
+   Heikin-Ashi candle on her own series, the push / slowing read, and the
+   agreement rule with the 6H spread — every number computed live in the
+   visitor's own browser off the same Binance public feed. */
+const TF_OFFICES = [
+  {key:"1H", iv:"1h"}, {key:"4H", iv:"4h"}, {key:"6H", iv:"6h"},
+  {key:"DAY", iv:"1d"}, {key:"WEEK", iv:"1w"}, {key:"MONTH", iv:"1M"}
+];
+const TF_FULL = {LTCUSDT:"Ł LITECOIN", BTCUSDT:"₿ BITCOIN", ETHUSDT:"Ξ ETHEREUM", SOLUSDT:"◎ SOLANA", BCHUSDT:"BCH BITCOIN CASH", BNBUSDT:"BNB"};
+(function buildTfGrids(){
+  for(const o of TF_OFFICES){
+    const grid = document.getElementById("tf-grid-" + o.key);
+    if(!grid) continue;
+    for(const s of SYMBOLS){
+      const cell = document.createElement("div");
+      cell.className = "cell"; cell.id = "tf-" + o.key + "-" + s; cell.dataset.army = "";
+      cell.innerHTML = '<div class="coin"></div><div class="price">—</div><div class="word">READING…</div>';
+      cell.querySelector(".coin").textContent = TF_FULL[s];
+      grid.appendChild(cell);
+    }
+  }
+})();
+const tfState = {}; // cell id -> {word, timer}
+function renderTf(key, symbol, read, live){
+  const cell = document.getElementById("tf-" + key + "-" + symbol);
+  if(!cell) return;
+  cell.querySelector(".price").textContent = fmtPrice(live);
+  cell.querySelector(".word").textContent = read.word;
+  cell.dataset.army = read.army;
+  const prev = tfState[cell.id];
+  if(!prev || prev.word !== read.word){
+    cell.classList.remove("flash-green","flash-red");
+    void cell.offsetWidth; // restart the flash
+    cell.classList.add(read.army === "GREEN" ? "flash-green" : "flash-red");
+    if(prev && prev.timer) clearTimeout(prev.timer);
+    const timer = setTimeout(() => cell.classList.remove("flash-green","flash-red"), 60000);
+    tfState[cell.id] = { word: read.word, timer };
+  }
+}
+const tfKlineCache = {}; // "LTCUSDT|1h" -> candles
+async function tfFetchKlines(){
+  const jobs = [];
+  for(const s of SYMBOLS) for(const o of TF_OFFICES){
+    jobs.push(binanceKlines(s, o.iv, 120)
+      .then(k => { tfKlineCache[s + "|" + o.iv] = k; })
+      .catch(() => {}));
+  }
+  await Promise.all(jobs);
+}
+async function tfTick(){
+  try{
+    const prices = await binancePrices();
+    const spreads = {};
+    for(const s of SYMBOLS){
+      const k6 = tfKlineCache[s + "|6h"];
+      if(prices[s] != null && k6 && k6.length > 1){
+        const ha6 = heikinAshi(k6);
+        spreads[s] = prices[s] - ha6[ha6.length - 1].close;
+      }
+    }
+    for(const o of TF_OFFICES){
+      for(const s of SYMBOLS){
+        const candles = tfKlineCache[s + "|" + o.iv];
+        if(candles && candles.length > 5 && prices[s] != null){
+          const read = composeWord(s, surveyRead(s, candles, prices[s]), spreads[s] != null ? spreads[s] : null);
+          renderTf(o.key, s, read, prices[s]);
+        }
+      }
+    }
+  }catch(e){ /* next tick retries */ }
+}
+tfFetchKlines().then(tfTick);
+setInterval(tfFetchKlines, 30000);
+setInterval(tfTick, 5000);
 
 /* ---------- temp / one-minute / four-points data loops ---------- */
 const tempKlineCache = {}; // "LTCUSDT|1M" -> candles
