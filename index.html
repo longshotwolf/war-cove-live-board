@@ -671,7 +671,15 @@
       .then(function(r){ return r.json(); }).then(take).catch(function(){});
   }
   function fetchSpeech(){
+    // Start from the lane that served last: a sick first lane
+    // otherwise taxes every poll its full 2.5s timeout before
+    // the healthy lane is tried (a session was measured carrying
+    // the playlist body at ~1 KB/s minutes after its birth while
+    // its sibling ran ~9 KB/s — failover gets her the line, the
+    // sticky start keeps the tax from repeating every 5s).
     var bases = laneList.slice();
+    var li = laneBase ? bases.indexOf(laneBase) : -1;
+    if (li > 0){ bases.splice(li, 1); bases.unshift(laneBase); }
     function tryLane(i){
       if (i >= bases.length) return Promise.reject(new Error("no lane"));
       return fetchWithTimeout(bases[i] + "/speech.json?cb=" + Date.now(), 2500)
