@@ -636,26 +636,52 @@
      broken. Cadence items carry their candle's expiry (exp): a
      line that lands after its candle rolled is dropped, never
      spoken as current — the newest line wins. */
-  var laneBase = null, liveBase = RELAY, liveExp = {};
+  var laneBase = null, laneList = [], liveBase = RELAY, liveExp = {};
   function fetchWithTimeout(url, ms){
     if (!("AbortController" in window)) return fetch(url);
     var ctl = new AbortController();
     var t = setTimeout(function(){ ctl.abort(); }, ms);
     return fetch(url, { signal: ctl.signal }).then(function(r){ clearTimeout(t); return r; });
   }
+  /* SPEED (Nov 18, 2026 — the Warlord's order: "get her faster"):
+     the keeper now holds TWO tunnel sessions and publishes both
+     (endpoints[]; endpoint stays as the primary for older seats).
+     Discovery races this repo's Pages copy of speech-endpoint.json
+     against the repo's RAW copy: measured live, Pages still served
+     a two-generations-old endpoint ~50s after a rotation while raw
+     carried the current one ~8s after the keeper's commit — the
+     seat was chasing dead tunnels for minutes after every
+     rotation. First valid answer wins; the 60s tick keeps the
+     list fresh, and a total lane failure re-discovers at once. */
+  function applyEndpoints(j){
+    if (!j) return;
+    var list = [];
+    if (j.endpoints && j.endpoints.length) list = j.endpoints.slice();
+    else if (j.endpoint) list = [j.endpoint];
+    list = list.map(function(u){ return String(u).replace(/\/+$/, ""); })
+               .filter(function(u){ return /^https:\/\//.test(u); });
+    if (list.length){ laneList = list; laneBase = list[0]; }
+  }
   function discoverLane(){
-    fetch("speech-endpoint.json?cb=" + Date.now()).then(function(r){ return r.json(); })
-      .then(function(j){
-        if (j && j.endpoint) laneBase = String(j.endpoint).replace(/\/+$/, "");
-      }).catch(function(){});
+    var done = false;
+    function take(j){ if (!done && j){ done = true; applyEndpoints(j); } }
+    fetch("speech-endpoint.json?cb=" + Date.now())
+      .then(function(r){ return r.json(); }).then(take).catch(function(){});
+    fetchWithTimeout("https://raw.githubusercontent.com/longshotwolf/war-cove-live-board/main/speech-endpoint.json?cb=" + Date.now(), 4000)
+      .then(function(r){ return r.json(); }).then(take).catch(function(){});
   }
   function fetchSpeech(){
-    var viaLane = laneBase
-      ? fetchWithTimeout(laneBase + "/speech.json?cb=" + Date.now(), 2500)
-          .then(function(r){ if (!r.ok) throw new Error("lane"); return r.json(); })
-          .then(function(j){ liveBase = laneBase + "/"; return j; })
-      : Promise.reject(new Error("no lane"));
-    return viaLane.catch(function(){
+    var bases = laneList.slice();
+    function tryLane(i){
+      if (i >= bases.length) return Promise.reject(new Error("no lane"));
+      return fetchWithTimeout(bases[i] + "/speech.json?cb=" + Date.now(), 2500)
+        .then(function(r){ if (!r.ok) throw new Error("lane"); return r.json(); })
+        .then(function(j){ laneBase = bases[i]; liveBase = bases[i] + "/"; return j; })
+        .catch(function(){ return tryLane(i + 1); });
+    }
+    return tryLane(0).catch(function(){
+      discoverLane();  // every known lane failed — re-discover now,
+                       // not on the 60s tick
       return fetch(RELAY + "speech.json?cb=" + Date.now())
         .then(function(r){ return r.json(); })
         .then(function(j){ liveBase = RELAY; return j; });
@@ -671,19 +697,38 @@
       // dropped and the queue moves on to the newest line.
       ariaPlaying = false; pumpAria(); return;
     }
-    var a = new Audio(liveBase + "speech/" + id + ".mp3");
-    var done = false;
-    var finish = function(){ if (done) return; done = true; ariaPlaying = false; pumpAria(); };
-    a.onended = finish;
-    a.onerror = finish;
-    try {
-      var p = a.play();
-      if (p && p.catch) p.catch(function(){
-        if (done) return; done = true; ariaPlaying = false;
-        ariaQ.unshift(id);  // autoplay policy held it — the line is
-                            // kept, retried on the next poll or a tap
-      });
-    } catch (e) { finish(); }
+    // Audio delivery bases, in order: the base that served her
+    // playlist, then the other fast lanes, then the Pages relay.
+    // A tunnel hiccup (502s ride these lanes — measured live
+    // Nov 18, 2026) used to kill the line outright: the audio
+    // error ended it and the queue moved on. Now the SAME line
+    // retries on the next base while its candle lives; it is
+    // dropped only when every base fails or its candle rolls —
+    // the expiry law stands untouched.
+    var bases = [liveBase];
+    for (var bi = 0; bi < laneList.length; bi++){
+      var lb = laneList[bi] + "/";
+      if (bases.indexOf(lb) < 0) bases.push(lb);
+    }
+    if (bases.indexOf(RELAY) < 0) bases.push(RELAY);
+    var attempt = function(bi){
+      if (bi >= bases.length){ ariaPlaying = false; pumpAria(); return; }
+      if (liveExp[id] && Date.now() > liveExp[id]){ ariaPlaying = false; pumpAria(); return; }
+      var a = new Audio(bases[bi] + "speech/" + id + ".mp3");
+      var done = false;
+      var finish = function(){ if (done) return; done = true; ariaPlaying = false; pumpAria(); };
+      a.onended = finish;
+      a.onerror = function(){ if (done) return; done = true; attempt(bi + 1); };
+      try {
+        var p = a.play();
+        if (p && p.catch) p.catch(function(){
+          if (done) return; done = true; ariaPlaying = false;
+          ariaQ.unshift(id);  // autoplay policy held it — the line is
+                              // kept, retried on the next poll or a tap
+        });
+      } catch (e) { attempt(bi + 1); }
+    };
+    attempt(0);
   }
   function pollLive(){
     pumpAria();
