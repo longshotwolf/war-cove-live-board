@@ -201,6 +201,24 @@
 </style>
 </head>
 <body>
+<style>
+  #bigflash{
+    position:fixed; top:0; left:0; right:0; z-index:9999;
+    display:none; text-align:center; padding:16px 10px 14px;
+    border-bottom:3px solid rgba(0,0,0,.45);
+    box-shadow:0 6px 34px rgba(0,0,0,.55);
+  }
+  #bigflash.show{display:block;}
+  #bigflash.bottom{background:var(--green); animation:bigFlashG .5s linear infinite;}
+  #bigflash.top{background:var(--red); animation:bigFlashR .5s linear infinite;}
+  #bigflash .bf-main{font-size:clamp(24px,5.4vw,44px); font-weight:900; letter-spacing:.06em; line-height:1.15;}
+  #bigflash .bf-sub{margin-top:4px; font-size:clamp(16px,3.4vw,26px); font-weight:800; letter-spacing:.1em;}
+  #bigflash.bottom .bf-main, #bigflash.bottom .bf-sub{color:#03130a;}
+  #bigflash.top .bf-main, #bigflash.top .bf-sub{color:#1c0207;}
+  @keyframes bigFlashG{0%,100%{background:#22ff88;}50%{background:#a9ffd2;}}
+  @keyframes bigFlashR{0%,100%{background:#ff4455;}50%{background:#ffb3ba;}}
+</style>
+<div id="bigflash" role="alert"><div class="bf-main"></div><div class="bf-sub"></div></div>
 <div class="frame">
   <header>
     <h1>WAR COVE LIVE BOARD</h1>
@@ -1103,6 +1121,7 @@ function tempFireHit(cell, level){
     count: cell.record ? cell.record.count + 1 : 1
   };
   cell.flashUntil = Date.now() + TEMP_FLASH_MS;
+  if(window.bigFlashMaybe) bigFlashMaybe(cell, level); // BIG FLASH banner (exception 9) — display only
 }
 function tempEvaluate(cell, candles, live){
   const ha = heikinAshi(candles);
@@ -1607,6 +1626,39 @@ setInterval(tempFetchKlines, 30000);
 setInterval(oneFetchKlines, 15000);
 setInterval(tempTick, 5000);
 setInterval(() => { tempRenderSideLights(); oneRenderLights(); }, 1000); // the 60-second holds expire on time
+</script>
+<script>
+/* ---------- BIG FLASH banner (lock exception 9, Nov 18 2026) ----------
+   Display-only. Rides Terra/Vega's fresh-hit event (tempFireHit) — no new
+   detector, no data pulls, no read logic touched. MONTH / WEEK / DAY hits
+   only; 4H/6H keep their cell lights and never fire this banner. Banners
+   show ONE AT A TIME, in the order the hits landed, a few seconds each,
+   then clear themselves (his one-at-a-time law). */
+var bigFlashQueue = [];
+var bigFlashBusy = false;
+function bigFlashMaybe(cell, level){
+  if(["MONTH","WEEK","DAY"].indexOf(cell.frame) < 0) return;
+  bigFlashQueue.push({ side: cell.side, frame: cell.frame,
+    coin: NAMES[cell.symbol] || cell.symbol, price: level });
+  bigFlashPump();
+}
+function bigFlashPump(){
+  if(bigFlashBusy) return;
+  var hit = bigFlashQueue.shift();
+  if(!hit) return;
+  bigFlashBusy = true;
+  var el = document.getElementById("bigflash");
+  var bottom = hit.side === "bottom";
+  el.querySelector(".bf-main").textContent = bottom
+    ? "TEMP BOTTOM ON THE " + hit.frame + " — GOOD LONG"
+    : "TEMP TOP ON THE " + hit.frame + " — GOOD SHORT";
+  el.querySelector(".bf-sub").textContent = hit.coin + " · " + fmtPrice(hit.price);
+  el.className = bottom ? "show bottom" : "show top";
+  setTimeout(function(){
+    el.className = "";
+    setTimeout(function(){ bigFlashBusy = false; bigFlashPump(); }, 350);
+  }, 6000);
+}
 </script>
 <script>
 if ('serviceWorker' in navigator) {
