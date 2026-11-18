@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#04070a">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="War Cove">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>War Cove Live Board</title>
 <style>
   :root{
@@ -1601,6 +1607,13 @@ setInterval(tempFetchKlines, 30000);
 setInterval(oneFetchKlines, 15000);
 setInterval(tempTick, 5000);
 setInterval(() => { tempRenderSideLights(); oneRenderLights(); }, 1000); // the 60-second holds expire on time
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
 </script>
 </body>
 </html>
