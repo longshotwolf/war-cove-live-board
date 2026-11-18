@@ -891,26 +891,47 @@ const NAMES = {LTCUSDT:"Ł LTC", BTCUSDT:"₿ BTC", ETHUSDT:"Ξ ETH", SOLUSDT:"�
 const BIGMOVE = {LTCUSDT:1.00, BTCUSDT:1000, ETHUSDT:30, SOLUSDT:2, BCHUSDT:30, BNBUSDT:2};
 const POLL_MS = 3000;
 
-/* ---------- data source: the Binance public feed ----------
-   The house tape sends no CORS permission header, so no browser
-   page can read it. Every read on this board runs off the Binance public
-   feed — the house fallback — and the board says so on its face. */
-const BINANCE = "https://data-api.binance.vision";
-
+/* ---------- data source: the house relay lane ----------
+   The house tape (Bitunix) sends no CORS permission header, so no
+   browser page can read it direct. The house relay
+   (war-cove-master-feed-relay) fetches the RAW Bitunix tape
+   server-side and republishes it as feed/tape.json in this board's
+   own repo — raw klines + live prices, no computed reads. Every
+   read on this board is still computed here, in the visitor's own
+   browser, off that tape, by the board's own math. (Warlord's
+   order, Nov 17, 2026: the open-web face drinks the house tape
+   through the relay lane, not the Binance fallback. The two feed
+   functions below keep their names and return shapes so nothing
+   downstream changes; a tape older than five minutes is treated
+   as a dead feed, never dressed as live.) */
+const TAPE_URL = "feed/tape.json";
+const TAPE_STALE_MS = 300000;
+let tapeCache = null, tapePromise = null, tapeStamp = 0;
+async function houseTape(){
+  if(tapeCache && Date.now() - tapeStamp < 2500) return tapeCache;
+  if(!tapePromise){
+    tapePromise = fetch(TAPE_URL + "?cb=" + Date.now())
+      .then(r => { if(!r.ok) throw new Error("tape http " + r.status); return r.json(); })
+      .then(j => {
+        if(!j || typeof j.at !== "number" || Date.now() - j.at > TAPE_STALE_MS)
+          throw new Error("tape stale");
+        tapeCache = j; tapeStamp = Date.now(); tapePromise = null; return j;
+      })
+      .catch(err => { tapePromise = null; throw err; });
+  }
+  return tapePromise;
+}
 async function binanceKlines(symbol, interval, limit){
-  const r = await fetch(`${BINANCE}/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
-  if(!r.ok) throw new Error("binance http "+r.status);
-  const j = await r.json();
-  if(!Array.isArray(j) || !j.length) throw new Error("binance payload");
-  return j.map(k => ({time:k[0], open:+k[1], high:+k[2], low:+k[3], close:+k[4]}));
+  const t = await houseTape();
+  const arr = t && t.klines ? t.klines[symbol + "|" + interval] : null;
+  if(!Array.isArray(arr) || !arr.length) throw new Error("tape payload");
+  return arr.slice(-limit).map(k => ({time:k[0], open:k[1], high:k[2], low:k[3], close:k[4]}));
 }
 async function binancePrices(){
-  const syms = encodeURIComponent(JSON.stringify(SYMBOLS));
-  const r = await fetch(`${BINANCE}/api/v3/ticker/price?symbols=${syms}`);
-  if(!r.ok) throw new Error("binance http "+r.status);
-  const j = await r.json();
+  const t = await houseTape();
   const out = {};
-  for(const row of j){ const p = parseFloat(row.price); if(isFinite(p)) out[row.symbol] = p; }
+  if(t && t.prices) for(const s of SYMBOLS){ const p = parseFloat(t.prices[s]); if(isFinite(p)) out[s] = p; }
+  if(!Object.keys(out).length) throw new Error("tape payload");
   return out;
 }
 
