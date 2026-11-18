@@ -71,6 +71,65 @@
   @keyframes flashRed{0%,100%{background:rgba(255,68,85,.08);}50%{background:rgba(255,68,85,.48);}}
   .cell.flash-green{animation:flashGreen .9s ease-in-out infinite;}
   .cell.flash-red{animation:flashRed .9s ease-in-out infinite;}
+  /* ---------- SIERRA 3M RADAR FACE (exception 10) — blue hologram energy ----------
+     Display only: the radar is the survey cell's face. Sierra's read, words,
+     feed and poll are untouched; .coin/.price/.word keep their exact DOM
+     contract (Calla's seat scrapes .word from these cells). A cell that has
+     not landed a read shows plain HELD on its radar — never a stale word. */
+  #survey-grid .cell{position:relative;}
+  .radar{
+    position:relative; width:min(100%,290px); aspect-ratio:1/1; margin:2px auto 0;
+    border-radius:50%;
+    border:1.5px solid rgba(96,196,255,.85);
+    background:
+      radial-gradient(circle at 50% 50%, rgba(120,220,255,.20) 0%, rgba(40,140,255,.10) 34%, rgba(6,18,34,.25) 72%),
+      repeating-radial-gradient(circle at 50% 50%, rgba(96,196,255,.28) 0 1.5px, transparent 1.5px 25%);
+    box-shadow:0 0 22px rgba(64,170,255,.45), inset 0 0 34px rgba(64,170,255,.28), inset 0 0 90px rgba(30,110,255,.16);
+    overflow:hidden;
+    animation:radarFloat 6s ease-in-out infinite alternate;
+  }
+  @keyframes radarFloat{from{transform:translateY(-2px);}to{transform:translateY(2px);}}
+  .radar::before,.radar::after{content:""; position:absolute; background:rgba(96,196,255,.35); z-index:1;}
+  .radar::before{left:50%; top:0; width:1.5px; height:100%; transform:translateX(-50%);}
+  .radar::after{top:50%; left:0; height:1.5px; width:100%; transform:translateY(-50%);}
+  .radar .sweep{
+    position:absolute; inset:0; border-radius:50%; z-index:2;
+    background:conic-gradient(from 0deg, rgba(140,225,255,.75), rgba(80,180,255,.25) 45deg, transparent 85deg);
+    animation:radarSpin 4.5s linear infinite;
+  }
+  @keyframes radarSpin{to{transform:rotate(360deg);}}
+  .radar .core{
+    position:absolute; left:50%; top:50%; width:46%; height:46%; z-index:2;
+    transform:translate(-50%,-50%); border-radius:50%;
+    background:radial-gradient(circle, rgba(190,240,255,.5) 0%, rgba(90,190,255,.22) 45%, transparent 72%);
+    filter:blur(1px);
+  }
+  .radar .blip{
+    position:absolute; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; border-radius:50%; z-index:3;
+    background:#bfeaff; box-shadow:0 0 10px 3px rgba(110,200,255,.8);
+    animation:blipPulse 2.6s ease-in-out infinite;
+  }
+  @keyframes blipPulse{0%,100%{opacity:.25;}50%{opacity:1;}}
+  .radar .shimmer{
+    position:absolute; inset:0; border-radius:50%; z-index:4; pointer-events:none;
+    background:linear-gradient(115deg, transparent 30%, rgba(180,235,255,.14) 48%, transparent 62%);
+    background-size:250% 250%;
+    animation:radarShimmer 5.5s ease-in-out infinite;
+  }
+  @keyframes radarShimmer{0%,100%{background-position:110% 0;}50%{background-position:-10% 0;}}
+  .radar .rcenter{
+    position:absolute; inset:0; z-index:5;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:12%; text-shadow:0 1px 8px rgba(0,10,20,.9);
+  }
+  #survey-grid .cell .held{
+    margin-top:10px; font-size:clamp(19px,4.2vw,30px); font-weight:900; letter-spacing:.14em;
+    color:#9fd8ff; display:none;
+  }
+  #survey-grid .cell:not(.landed) .held{display:block;}
+  #survey-grid .cell:not(.landed) .price,
+  #survey-grid .cell:not(.landed) .word{display:none;}
+  #survey-grid .cell.landed .held{display:none;}
   .rows{display:flex; flex-direction:column; gap:9px;}
   .row{
     display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px;
@@ -1215,10 +1274,19 @@ function renderMarket(symbol, live){
 (function(){
   const grid = document.getElementById("survey-grid");
   const FULL = {LTCUSDT:"Ł LITECOIN", BTCUSDT:"₿ BITCOIN", ETHUSDT:"Ξ ETHEREUM", SOLUSDT:"◎ SOLANA", BCHUSDT:"BCH BITCOIN CASH", BNBUSDT:"BNB"};
+  const BLIPS = [[24,34],[63,22],[55,64]];
   for(const s of SYMBOLS){
     const cell = document.createElement("div");
     cell.className = "cell"; cell.id = "survey-" + s; cell.dataset.army = "";
-    cell.innerHTML = '<div class="coin"></div><div class="price">—</div><div class="word">READING…</div>';
+    const bi = SYMBOLS.indexOf(s);
+    let blips = "";
+    for(let b = 0; b < 3; b++){
+      const bx = (BLIPS[b][0] + bi * 9) % 78 + 8;
+      const by = (BLIPS[b][1] + bi * 13) % 72 + 12;
+      blips += '<span class="blip" style="left:' + bx + '%;top:' + by + '%;animation-delay:' + (b * 0.7 + bi * 0.3).toFixed(1) + 's"></span>';
+    }
+    cell.innerHTML = '<div class="radar"><div class="sweep"></div><div class="core"></div>' + blips +
+      '<div class="shimmer"></div><div class="rcenter"><div class="coin"></div><div class="price">—</div><div class="word">READING…</div><div class="held">HELD</div></div></div>';
     cell.querySelector(".coin").textContent = FULL[s];
     grid.appendChild(cell);
   }
@@ -1229,6 +1297,7 @@ function renderSurvey(symbol, read, live){
   cell.querySelector(".price").textContent = fmtPrice(live);
   cell.querySelector(".word").textContent = read.word;
   cell.dataset.army = read.army;
+  cell.classList.add("landed"); // RADAR FACE (exception 10): a landed read lifts the HELD state
   const prev = surveyState[symbol];
   if(!prev || prev.word !== read.word){
     cell.classList.remove("flash-green","flash-red");
