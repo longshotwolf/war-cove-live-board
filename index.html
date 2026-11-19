@@ -2433,7 +2433,14 @@ function bigFlashPump(){
    the personal board's: the endpoint file on the house preview page
    names the counter service's CURRENT base URL in its "counter" field
    (the address rotates; it is never hardcoded here), and the counts
-   stand at <counter>/counts. KICK is his one channel's live state and
+   stand at <counter>/counts. SEPARATED LANES (his order, Nov 19,
+   2026): these windows drink from the board's OWN counter lane
+   first (viewer-endpoint.json — an independent tunnel to the same
+   one counter), fall back to the link-watch lane
+   (simli-endpoint.json), and finally to the counter's Pages
+   snapshot (counts-snapshot.json) — one tunnel's death cannot
+   dark these windows, and the numbers are always the one
+   counter's. KICK is his one channel's live state and
    viewer count, counted house-side through the official Kick lane by
    the counter service — the same channel number in every window,
    because it is one channel. LINK is each board's watching_now off the
@@ -2444,7 +2451,9 @@ function bigFlashPump(){
    HELD: no number is ever invented and no stale number is carried. */
 (function(){
   "use strict";
-  var DOC = "https://longshotwolf.github.io/war-cove-newsroom-preview/simli-endpoint.json";
+  var DOC2 = "https://longshotwolf.github.io/war-cove-newsroom-preview/viewer-endpoint.json";
+  var DOC1 = "https://longshotwolf.github.io/war-cove-newsroom-preview/simli-endpoint.json";
+  var SNAP = "https://longshotwolf.github.io/war-cove-newsroom-preview/counts-snapshot.json";
   function setKick(txt){
     var els = document.querySelectorAll(".vw-kick");
     for(var i = 0; i < els.length; i++) els[i].textContent = txt;
@@ -2466,16 +2475,25 @@ function bigFlashPump(){
     return (typeof n === "number" && isFinite(n)) ? n : null;
   }
   function linkText(n){ return n === null ? "HELD" : String(n); }
-  function read(){
-    var stamp = Date.now();
-    fetch(DOC + "?t=" + stamp, { cache: "no-store" })
+  function readFrom(doc, stamp){
+    return fetch(doc + "?t=" + stamp, { cache: "no-store" })
       .then(function(r){ if(!r.ok) throw new Error("endpoint file"); return r.json(); })
       .then(function(ep){
         var counter = ep && typeof ep === "object" ? ep.counter : null;
         if(typeof counter !== "string" || !counter) throw new Error("no counter address");
         return fetch(counter.replace(/\/+$/, "") + "/counts?t=" + stamp, { cache: "no-store" });
       })
-      .then(function(r){ if(!r.ok) throw new Error("counts"); return r.json(); })
+      .then(function(r){ if(!r.ok) throw new Error("counts"); return r.json(); });
+  }
+  function readSnap(stamp){
+    return fetch(SNAP + "?t=" + stamp, { cache: "no-store" })
+      .then(function(r){ if(!r.ok) throw new Error("snapshot"); return r.json(); });
+  }
+  function read(){
+    var stamp = Date.now();
+    readFrom(DOC2, stamp)
+      .catch(function(){ return readFrom(DOC1, stamp); })
+      .catch(function(){ return readSnap(stamp); })
       .then(function(raw){
         var root = raw && typeof raw === "object" ? raw : {};
         var pages = root.pages && typeof root.pages === "object" ? root.pages : {};
