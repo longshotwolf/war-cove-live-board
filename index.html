@@ -321,6 +321,32 @@
   .desks2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:4px;}
   @media (max-width:680px){ .desks2{grid-template-columns:1fr;} }
   .desks2 .desk{margin-bottom:0;}
+  /* ---------- SHEITY'S VIEWER WINDOWS (lock exception 16) ----------
+     Three glass panels in HER office — the Front Desk — one per board
+     (War Cove Live Board · Paper Game Board · Stock Board), each with
+     TWO numbers standing SEPARATE, never merged: KICK (his one Kick
+     channel's live viewers, counted house-side through the official
+     Kick lane by the counter service) and LINK (that board's own
+     watching_now off the house link counter). Static glass — no
+     motion. A lane that cannot be read shows HELD; the channel off
+     air shows OFF AIR. No number is ever invented and no stale
+     number is carried. The same windows as her office on the
+     Warlord's personal Day Brief, in this board's glass. */
+  .vwin{margin-top:2px; border:1.5px solid var(--line); border-radius:12px; padding:8px 10px 10px;
+    background:linear-gradient(180deg, rgba(57,255,176,.10), rgba(57,255,176,.03));
+    box-shadow:inset 0 1px 0 rgba(190,255,220,.16), inset 0 0 22px rgba(57,255,176,.05);}
+  .vwin-title{font-size:11px; font-weight:800; letter-spacing:.22em; color:#7fd8ab; text-transform:uppercase; text-align:center;}
+  .vwin-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:8px;}
+  @media (max-width:680px){ .vwin-grid{grid-template-columns:1fr;} }
+  .vwin-panel{border:1.5px solid rgba(57,255,176,.35); border-radius:10px; padding:8px 10px;
+    background:linear-gradient(180deg, rgba(190,255,220,.09), rgba(57,255,176,.03));
+    box-shadow:inset 0 1px 0 rgba(190,255,220,.18);}
+  .vwin-name{font-size:12px; font-weight:800; letter-spacing:.14em; color:#fff; text-transform:uppercase;}
+  .vwin-row{display:flex; align-items:flex-end; justify-content:space-between; gap:8px; margin-top:2px;}
+  .vwin-kick-row{margin-top:6px; padding-top:6px; border-top:1px solid rgba(57,255,176,.18);}
+  .vwin-label{font-size:10px; font-weight:800; letter-spacing:.2em; color:#7fd8ab; text-transform:uppercase;}
+  .vwin-num{font-size:19px; font-weight:900; line-height:1; color:#fff; font-variant-numeric:tabular-nums;}
+  .vwin-num.link{color:#d9ffe9;}
   /* ---------- still offices — treasury · broadcast · production ---------- */
   .pots{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
   @media (max-width:680px){ .pots{grid-template-columns:1fr;} }
@@ -404,6 +430,26 @@
         <div class="dname">SHEITY</div>
         <div class="djob">President — Front Desk · Presents the Day</div>
         <div class="dgrade">Grade record: <b>no machine grade</b> — the front desk is graded by the Warlord's eyes. Still portrait: she is here to be seen and read — no live line, nothing connects, nothing operates.</div>
+      </div>
+    </div>
+    <div class="vwin" id="viewer-windows">
+      <div class="vwin-title">Viewer windows — who is watching the boards</div>
+      <div class="vwin-grid">
+        <div class="vwin-panel">
+          <div class="vwin-name">War Cove Live Board</div>
+          <div class="vwin-row vwin-kick-row"><span class="vwin-label">Kick</span><span class="vwin-num vw-kick">HELD</span></div>
+          <div class="vwin-row"><span class="vwin-label">Link</span><span class="vwin-num link" id="vw-link-live-board">HELD</span></div>
+        </div>
+        <div class="vwin-panel">
+          <div class="vwin-name">Paper Game Board</div>
+          <div class="vwin-row vwin-kick-row"><span class="vwin-label">Kick</span><span class="vwin-num vw-kick">HELD</span></div>
+          <div class="vwin-row"><span class="vwin-label">Link</span><span class="vwin-num link" id="vw-link-board">HELD</span></div>
+        </div>
+        <div class="vwin-panel">
+          <div class="vwin-name">Stock Board</div>
+          <div class="vwin-row vwin-kick-row"><span class="vwin-label">Kick</span><span class="vwin-num vw-kick">HELD</span></div>
+          <div class="vwin-row"><span class="vwin-label">Link</span><span class="vwin-num link" id="vw-link-stock-board">HELD</span></div>
+        </div>
       </div>
     </div>
   </section>
@@ -2299,6 +2345,77 @@ function bigFlashPump(){
   }
   mnPaint();
   setInterval(mnPaint, 1000);
+})();
+</script>
+<script>
+/* ---------- SHEITY'S VIEWER WINDOWS (lock exception 16, Nov 19 2026) ----------
+   Display-only. The same three windows that stand in Sheity's office on
+   the Warlord's personal Day Brief, standing here in her Front Desk
+   office on the live board by his word — "they're supposed to be on
+   both boards." The read is the counter lane's own way, identical to
+   the personal board's: the endpoint file on the house preview page
+   names the counter service's CURRENT base URL in its "counter" field
+   (the address rotates; it is never hardcoded here), and the counts
+   stand at <counter>/counts. KICK is his one channel's live state and
+   viewer count, counted house-side through the official Kick lane by
+   the counter service — the same channel number in every window,
+   because it is one channel. LINK is each board's watching_now off the
+   house link counter. The two numbers stand separate, never merged.
+   This lane arms LAST in the board's one-at-a-time order — its first
+   read waits until the reader lanes ahead of it are up — then
+   re-reads on a ~30-second rhythm. A failed read leaves every window
+   HELD: no number is ever invented and no stale number is carried. */
+(function(){
+  "use strict";
+  var DOC = "https://longshotwolf.github.io/war-cove-newsroom-preview/simli-endpoint.json";
+  function setKick(txt){
+    var els = document.querySelectorAll(".vw-kick");
+    for(var i = 0; i < els.length; i++) els[i].textContent = txt;
+  }
+  function setLink(id, txt){
+    var el = document.getElementById(id);
+    if(el) el.textContent = txt;
+  }
+  function paintHeld(){
+    setKick("HELD");
+    setLink("vw-link-live-board", "HELD");
+    setLink("vw-link-board", "HELD");
+    setLink("vw-link-stock-board", "HELD");
+  }
+  function watchingNow(pages, key){
+    var page = pages ? pages[key] : null;
+    if(!page || typeof page !== "object") return null;
+    var n = page.watching_now;
+    return (typeof n === "number" && isFinite(n)) ? n : null;
+  }
+  function linkText(n){ return n === null ? "HELD" : String(n); }
+  function read(){
+    var stamp = Date.now();
+    fetch(DOC + "?t=" + stamp, { cache: "no-store" })
+      .then(function(r){ if(!r.ok) throw new Error("endpoint file"); return r.json(); })
+      .then(function(ep){
+        var counter = ep && typeof ep === "object" ? ep.counter : null;
+        if(typeof counter !== "string" || !counter) throw new Error("no counter address");
+        return fetch(counter.replace(/\/+$/, "") + "/counts?t=" + stamp, { cache: "no-store" });
+      })
+      .then(function(r){ if(!r.ok) throw new Error("counts"); return r.json(); })
+      .then(function(raw){
+        var root = raw && typeof raw === "object" ? raw : {};
+        var pages = root.pages && typeof root.pages === "object" ? root.pages : {};
+        var kick = root.kick && typeof root.kick === "object" ? root.kick : {};
+        var kickLive = typeof kick.live === "boolean" ? kick.live : null;
+        var kickViewers = (typeof kick.viewers === "number" && isFinite(kick.viewers)) ? kick.viewers : null;
+        setKick(kickLive === null ? "HELD" :
+                kickLive === false ? "OFF AIR" :
+                kickViewers !== null ? String(kickViewers) : "HELD");
+        setLink("vw-link-live-board", linkText(watchingNow(pages, "live-board")));
+        setLink("vw-link-board", linkText(watchingNow(pages, "board")));
+        setLink("vw-link-stock-board", linkText(watchingNow(pages, "stock-board-discord")));
+      })
+      .catch(function(){ paintHeld(); });
+  }
+  paintHeld();
+  setTimeout(function(){ read(); setInterval(read, 30000); }, 6000);
 })();
 </script>
 <script>
