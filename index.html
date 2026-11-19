@@ -142,7 +142,7 @@
      6H SPREAD compass rose (twin BID/ASK needles, the gap lit) · DAY
      chronometer gold · WEEK seven orbits green · MONTH lunar dial silver-blue. */
   .cface{
-    position:relative; width:min(100%,290px); aspect-ratio:1/1; margin:2px auto 0;
+    position:relative; width:min(100%,150px); aspect-ratio:1/1; margin:2px auto 0;
     filter:drop-shadow(0 0 6px var(--cfglow, rgba(96,196,255,.45)));
     animation:cfFloat 6s ease-in-out infinite alternate;
   }
@@ -151,8 +151,27 @@
   .cface .rcenter{
     position:absolute; inset:0; z-index:5;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:12%; text-shadow:0 1px 8px rgba(0,10,20,.9); text-align:center;
+    padding:15%; text-shadow:0 1px 8px rgba(0,10,20,.9); text-align:center;
   }
+  /* COMPACT SCALE + WORDING INSIDE THE DIAL (exception 13, the Warlord's
+     correction, Nov 18, 2026 late call): the faces went in at radar size
+     (290px blocks) — they now sit at the board's original compact cell
+     scale (150px dial; the timeframe cell stands at its pre-faces
+     height), and every word — coin, live price, and the office's FULL
+     read line (.word, the whole line as the office speaks it, never a
+     chopped label) — sits INSIDE the dial's center, the way Sierra's
+     3M radar carries hers. The type steps down so a full read line
+     fits the compact dial. Sierra's radar itself is NOT touched: her
+     section's bytes are identical to the pre-faces build. */
+  .cface .rcenter .coin{font-size:11.5px; letter-spacing:.18em;}
+  .cface .rcenter .price{font-size:17px; margin-top:5px;}
+  .cface .rcenter .word{
+    font-size:13px; margin-top:6px; min-height:0; line-height:1.3; letter-spacing:.03em;
+  }
+  #tf-grid-1H .cell .cface .held, #tf-grid-4H .cell .cface .held,
+  #tf-grid-6H .cell .cface .held, #tf-grid-DAY .cell .cface .held,
+  #tf-grid-WEEK .cell .cface .held, #tf-grid-MONTH .cell .cface .held,
+  #spread-rows .row .cface .held{font-size:13px; margin-top:6px; letter-spacing:.14em;}
   .cface .anim{transform-origin:150px 150px; transform-box:view-box;}
   .cf-spin-slow{animation:cfSpin 46s linear infinite;}
   .cf-spin-med{animation:cfSpin 16s linear infinite;}
@@ -185,20 +204,24 @@
   #tf-grid-WEEK .cell:not(.landed) .price, #tf-grid-WEEK .cell:not(.landed) .word,
   #tf-grid-MONTH .cell:not(.landed) .price, #tf-grid-MONTH .cell:not(.landed) .word,
   #spread-rows .row:not(.landed) .rprice, #spread-rows .row:not(.landed) .rspread,
-  #spread-rows .row:not(.landed) .rband{display:none;}
+  #spread-rows .row:not(.landed) .rband, #spread-rows .row:not(.landed) .rpush{display:none;}
   #tf-grid-1H .cell.landed .held, #tf-grid-4H .cell.landed .held,
   #tf-grid-6H .cell.landed .held, #tf-grid-DAY .cell.landed .held,
   #tf-grid-WEEK .cell.landed .held, #tf-grid-MONTH .cell.landed .held,
   #spread-rows .row.landed .held{display:none;}
-  /* Sable's rows — the compass rose stands in the row; the 3M push keeps its
-     own line under the face (SPREAD ≠ PUSH: two facts, two places). */
-  #spread-rows .row{flex-direction:column; align-items:center; text-align:center;}
-  #spread-rows .rpush{margin-left:0; margin-top:8px; text-align:center;}
-  #spread-rows .cface .rcenter .rcoin{display:block; min-width:0; font-size:15px; letter-spacing:.24em;}
-  #spread-rows .cface .rcenter .rprice{display:block; min-width:0; margin-top:8px;
-    font-size:clamp(22px,4.4vw,32px); font-weight:800; color:#fff;}
-  #spread-rows .cface .rcenter .rspread{display:block; min-width:0; margin-top:6px; font-size:21px;}
-  #spread-rows .cface .rcenter .rband{display:block; margin-top:4px; font-size:17px;}
+  /* Sable's rows — ROWS again (exception 13): the rose stands in the row
+     at the compact scale, and EVERY word sits inside the dial's center —
+     coin, live price, the spread figure in its own sign color, the band
+     in its own color, and the 3M push as its own labeled line under
+     them, in its own army color. SPREAD ≠ PUSH: two facts, two lines,
+     both inside the dial — nothing worded outside the frame. */
+  #spread-rows .row{flex-direction:row; align-items:center; justify-content:center; text-align:center;}
+  #spread-rows .rpush{margin-left:0; margin-top:6px; text-align:center; font-size:11px; line-height:1.3;}
+  #spread-rows .cface .rcenter .rcoin{display:block; min-width:0; font-size:11.5px; letter-spacing:.18em;}
+  #spread-rows .cface .rcenter .rprice{display:block; min-width:0; margin-top:5px;
+    font-size:17px; font-weight:800; color:#fff;}
+  #spread-rows .cface .rcenter .rspread{display:block; min-width:0; margin-top:5px; font-size:15px;}
+  #spread-rows .cface .rcenter .rband{display:block; margin-top:3px; font-size:12px;}
   .rows{display:flex; flex-direction:column; gap:9px;}
   .row{
     display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px;
@@ -438,6 +461,41 @@
     </div>
     <div class="tempbar" id="one-bar">NO 1M HIT LIT</div>
     <div class="tempwrap"><div class="tgrid onegrid" id="one-grid"></div></div>
+<style>
+  /* ---------- MINA 1M STOPWATCH FACE (exception 13) — electric white-cyan ----------
+     Display only, the special face the Warlord ordered for the one
+     minute (Nov 18, 2026 late call: "you didn't do nothing to the one
+     minute — do something special"): the fastest candle in the house
+     gets a stopwatch — crown on top, sixty ticks, and a second hand
+     that makes one full revolution per real minute (60s CSS sweep).
+     One stopwatch per coin at the board's compact scale (150px, same
+     as every corrected face), fed by Mina's EXISTING 1M read — her
+     cells' own levels and states, painted from her records; her read,
+     feed and poll are untouched. Center, inside the dial: the coin,
+     her word (her own state line — a hit, through, or the distance to
+     the nearer level, in her office's own colors), and her two level
+     prices. HELD until her read lands for the coin. */
+  #one-faces{margin-top:12px;}
+  #one-faces .cell{position:relative;}
+  .mn-hand{transform-origin:150px 150px; transform-box:view-box; animation:mnSpin 60s linear infinite;}
+  @keyframes mnSpin{to{transform:rotate(360deg);}}
+  .cface .rcenter .mn-word{
+    margin-top:6px; font-size:12.5px; font-weight:900; letter-spacing:.05em; line-height:1.3;
+    min-height:2.6em; display:flex; align-items:center; justify-content:center;
+  }
+  .cface .rcenter .mn-lvls{
+    margin-top:4px; font-size:10.5px; font-weight:700; font-variant-numeric:tabular-nums;
+    color:#cfe9da; min-height:1.2em;
+  }
+  #one-faces .cell .held{
+    margin-top:6px; font-size:13px; font-weight:900; letter-spacing:.14em; color:#9fd8ff; display:none;
+  }
+  #one-faces .cell:not(.landed) .held{display:block;}
+  #one-faces .cell:not(.landed) .coin, #one-faces .cell:not(.landed) .mn-word,
+  #one-faces .cell:not(.landed) .mn-lvls{display:none;}
+  #one-faces .cell.landed .held{display:none;}
+</style>
+    <div class="grid3" id="one-faces"></div>
   </section>
 
   <section>
@@ -531,7 +589,7 @@
      never an invented print. */
   #liq-grid .cell{position:relative;}
   .lqface{
-    position:relative; width:min(100%,290px); aspect-ratio:1/1; margin:2px auto 0;
+    position:relative; width:min(100%,150px); aspect-ratio:1/1; margin:2px auto 0;
     filter:drop-shadow(0 0 6px rgba(255,45,120,.45));
     animation:cfFloat 6s ease-in-out infinite alternate;
     opacity:.45;
@@ -547,20 +605,20 @@
   .lq-center{
     position:absolute; inset:0; z-index:5;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:12%; text-shadow:0 1px 8px rgba(0,10,20,.9); text-align:center;
+    padding:10%; text-shadow:0 1px 8px rgba(0,10,20,.9); text-align:center;
   }
-  .lq-coin{font-size:15px; letter-spacing:.24em; font-weight:700; color:#ffd3e4;}
+  .lq-coin{font-size:11.5px; letter-spacing:.18em; font-weight:700; color:#ffd3e4;}
   .lq-state{
-    margin-top:10px; font-size:clamp(17px,3.6vw,25px); font-weight:900; letter-spacing:.1em;
+    margin-top:6px; font-size:13px; font-weight:900; letter-spacing:.05em;
     line-height:1.3; min-height:2.6em; display:flex; align-items:center; justify-content:center;
     color:#ff8fb8;
   }
   #liq-grid .cell.flat .lq-state{color:#ffffff;}
   .lq-price{
-    margin-top:4px; font-size:clamp(20px,4vw,29px); font-weight:800;
+    margin-top:3px; font-size:17px; font-weight:800;
     font-variant-numeric:tabular-nums; color:#fff; min-height:1.2em;
   }
-  .lq-src{margin-top:4px; font-size:11.5px; font-weight:800; letter-spacing:.22em; color:#ff8fb8; min-height:1.2em;}
+  .lq-src{margin-top:3px; font-size:10px; font-weight:800; letter-spacing:.18em; color:#ff8fb8; min-height:1.2em;}
   .liq-srcbar{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:12px;}
   .liq-chip{
     padding:6px 12px; border:1.5px solid rgba(255,45,120,.4); border-radius:999px;
@@ -1456,8 +1514,9 @@ function renderSurvey(symbol, read, live){
    .rband/.rpush DOM contract inside the face's center (Calla's seat reads
    the spread figure + band off these elements); renderSpread adds the
    "landed" class when her read lands. The face carries the SPREAD — figure
-   in its own sign color, band in its own color — and the 3M push keeps its
-   own line under the face. SPREAD ≠ PUSH: two facts, two places. */
+   in its own sign color, band in its own color — and the 3M push as its
+   own labeled line under them, INSIDE the dial (exception 13: nothing
+   worded outside the frame). SPREAD ≠ PUSH: two facts, two lines. */
 const CF_SPREAD_GLOW = "rgba(255,107,157,.55)";
 const CF_SPREAD_FACE =
   '<svg viewBox="0 0 300 300" role="img" aria-label="6 hour spread compass rose face">' +
@@ -1490,8 +1549,7 @@ const spreadRows = {};
     row.className = "row"; row.id = "spread-" + s;
     row.innerHTML = '<div class="cface" style="--cfglow:' + CF_SPREAD_GLOW + '">' + CF_SPREAD_FACE +
                     '<div class="rcenter"><span class="rcoin"></span><span class="rprice">—</span>' +
-                    '<span class="rspread">—</span><span class="rband">—</span><div class="held">HELD</div></div></div>' +
-                    '<span class="rpush"></span>';
+                    '<span class="rspread">—</span><span class="rband">—</span><span class="rpush"></span><div class="held">HELD</div></div></div>';
     row.querySelector(".rcoin").textContent = NAMES[s];
     wrap.appendChild(row);
     spreadRows[s] = { row,
@@ -2153,6 +2211,80 @@ function bigFlashPump(){
       }, liqOnOkx);
     }, 1400);
   }catch(e){ /* no WebSocket in this browser: the office stays HELD, never invented */ }
+})();
+</script>
+<script>
+/* ---------- MINA 1M STOPWATCH FACE (lock exception 13, Nov 18 2026) ----------
+   Display-only. One stopwatch per coin in Mina's office, built here and
+   painted from her EXISTING one-minute records (the oneCells her own
+   machinery maintains — levels, states, distances). No new feed, no new
+   poll of any exchange: a 1-second local paint reads her records the
+   way Calla's seat reads rooms. Her read, feed, poll, cells, lights and
+   bars are untouched. The second hand sweeps one revolution per real
+   minute. A coin whose levels have not landed shows HELD on its watch. */
+(function(){
+  "use strict";
+  function mnTicks(){
+    var s = "";
+    for(var i = 0; i < 60; i++){
+      var a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+      var big = i % 5 === 0;
+      var rI = big ? 100 : 108, rO = 116;
+      s += '<line x1="' + (150 + Math.cos(a) * rI).toFixed(1) + '" y1="' + (150 + Math.sin(a) * rI).toFixed(1) +
+        '" x2="' + (150 + Math.cos(a) * rO).toFixed(1) + '" y2="' + (150 + Math.sin(a) * rO).toFixed(1) +
+        '" stroke="#d9fbff" stroke-width="' + (big ? 2.5 : 1) + '" opacity="' + (big ? 0.95 : 0.5) + '"/>';
+    }
+    return s;
+  }
+  var MN_FACE =
+    '<svg viewBox="0 0 300 300" role="img" aria-label="One minute stopwatch face">' +
+    '<rect x="138" y="2" width="24" height="13" rx="3" fill="#67e8f9"/>' +
+    '<rect x="145" y="13" width="10" height="12" fill="#67e8f9"/>' +
+    '<rect x="238" y="34" width="16" height="9" rx="2" transform="rotate(45 246 38)" fill="#67e8f9" opacity="0.8"/>' +
+    '<circle cx="150" cy="150" r="130" fill="rgba(217,251,255,0.04)" stroke="#d9fbff" stroke-width="2.5"/>' +
+    '<circle cx="150" cy="150" r="118" fill="none" stroke="#67e8f9" stroke-width="1" opacity="0.5"/>' +
+    '<g>' + mnTicks() + '</g>' +
+    '<circle cx="150" cy="86" r="25" fill="none" stroke="#67e8f9" stroke-width="1.5" opacity="0.85"/>' +
+    '<line x1="150" y1="86" x2="150" y2="68" stroke="#d9fbff" stroke-width="2"/>' +
+    '<g class="anim mn-hand"><line x1="150" y1="168" x2="150" y2="54" stroke="#e6feff" stroke-width="3" stroke-linecap="round" style="filter:drop-shadow(0 0 5px rgba(103,232,249,.9))"/></g>' +
+    '<circle cx="150" cy="150" r="6.5" fill="#04070a" stroke="#d9fbff" stroke-width="2"/>' +
+    '<g font-family="monospace" font-size="11" fill="#a5f3fc" text-anchor="middle" letter-spacing="3"><text x="150" y="248">ONE MINUTE</text></g></svg>';
+  var mnFaces = {}; // symbol -> {cell, word, lvls}
+  (function buildMnFaces(){
+    var grid = document.getElementById("one-faces");
+    if(!grid) return;
+    for(var i = 0; i < SYMBOLS.length; i++){
+      var s = SYMBOLS[i];
+      var cell = document.createElement("div");
+      cell.className = "cell"; cell.id = "oneface-" + s;
+      cell.innerHTML = '<div class="cface" style="--cfglow:rgba(103,232,249,.55)">' + MN_FACE +
+        '<div class="rcenter"><div class="coin"></div><div class="mn-word">READING…</div><div class="mn-lvls"></div><div class="held">HELD</div></div></div>';
+      cell.querySelector(".coin").textContent = NAMES[s];
+      grid.appendChild(cell);
+      mnFaces[s] = { cell: cell, word: cell.querySelector(".mn-word"), lvls: cell.querySelector(".mn-lvls") };
+    }
+  })();
+  function mnPaint(){
+    for(var i = 0; i < SYMBOLS.length; i++){
+      var s = SYMBOLS[i], F = mnFaces[s];
+      if(!F) continue;
+      var b = oneCells["one|bottom|" + s], t = oneCells["one|top|" + s];
+      if(!b || !t || b.level == null || t.level == null){ F.cell.classList.remove("landed"); continue; }
+      F.cell.classList.add("landed");
+      F.lvls.textContent = "B " + fmtPrice(b.level) + " · T " + fmtPrice(t.level);
+      var word, color;
+      if(b.state === "hit"){ word = "BOTTOM HIT — PRICE ON IT"; color = "#fb7185"; }
+      else if(t.state === "hit"){ word = "TOP HIT — PRICE ON IT"; color = "#22ff88"; }
+      else if(b.state === "through" || t.state === "through"){ word = "THROUGH — NOT HOLDING"; color = "#ffb3ab"; }
+      else if(b.dist != null && (t.dist == null || Math.abs(b.dist) <= Math.abs(t.dist))){ word = b.dist.toFixed(2) + "% FROM THE BOTTOM"; color = "#8fb8a2"; }
+      else if(t.dist != null){ word = t.dist.toFixed(2) + "% FROM THE TOP"; color = "#8fb8a2"; }
+      else { word = "LEVELS SET — WATCHING"; color = "#8fb8a2"; }
+      F.word.textContent = word;
+      F.word.style.color = color;
+    }
+  }
+  mnPaint();
+  setInterval(mnPaint, 1000);
 })();
 </script>
 <script>
