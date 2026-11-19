@@ -130,6 +130,75 @@
   #survey-grid .cell:not(.landed) .price,
   #survey-grid .cell:not(.landed) .word{display:none;}
   #survey-grid .cell.landed .held{display:none;}
+  /* ---------- CANDLE FACES (exception 11) — one hologram instrument per office ----------
+     Display only, the radar pattern (exception 10) carried to every office:
+     each face is its office cell's face. Reads, words, feeds and polls are
+     untouched; .coin/.price/.word in the timeframe cells and
+     .rcoin/.rprice/.rspread/.rband/.rpush in Sable's rows keep their exact
+     DOM contract (Calla's seat scrapes .word from the timeframe cells and
+     the spread figure + band from Sable's rows). A cell or row that has not
+     landed a read shows plain HELD on its face — never a stale word.
+     Faces: 1H compass teal · 4H gyroscope violet · 6H oscilloscope amber ·
+     6H SPREAD compass rose (twin BID/ASK needles, the gap lit) · DAY
+     chronometer gold · WEEK seven orbits green · MONTH lunar dial silver-blue. */
+  .cface{
+    position:relative; width:min(100%,290px); aspect-ratio:1/1; margin:2px auto 0;
+    filter:drop-shadow(0 0 6px var(--cfglow, rgba(96,196,255,.45)));
+    animation:cfFloat 6s ease-in-out infinite alternate;
+  }
+  @keyframes cfFloat{from{transform:translateY(-2px);}to{transform:translateY(2px);}}
+  .cface svg{width:100%; height:100%; display:block; overflow:visible;}
+  .cface .rcenter{
+    position:absolute; inset:0; z-index:5;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:12%; text-shadow:0 1px 8px rgba(0,10,20,.9); text-align:center;
+  }
+  .cface .anim{transform-origin:150px 150px; transform-box:view-box;}
+  .cf-spin-slow{animation:cfSpin 46s linear infinite;}
+  .cf-spin-med{animation:cfSpin 16s linear infinite;}
+  .cf-spin-rev{animation:cfSpinRev 34s linear infinite;}
+  .cf-needle{animation:cfSway 7s ease-in-out infinite;}
+  .cf-blip{animation:cfBlink 2.6s ease-in-out infinite;}
+  .cf-wave{animation:cfDash 5s linear infinite;}
+  .cf-pulse{animation:cfPulse 3.4s ease-in-out infinite;}
+  @keyframes cfSpin{to{transform:rotate(360deg);}}
+  @keyframes cfSpinRev{to{transform:rotate(-360deg);}}
+  @keyframes cfSway{0%,100%{transform:rotate(-32deg);}50%{transform:rotate(38deg);}}
+  @keyframes cfBlink{0%,100%{opacity:1;}50%{opacity:.15;}}
+  @keyframes cfDash{to{stroke-dashoffset:-240;}}
+  @keyframes cfPulse{0%,100%{opacity:.85;}50%{opacity:.25;}}
+  /* HELD state — timeframe cells + Sable's rows, same law as the radar */
+  #tf-grid-1H .cell .held, #tf-grid-4H .cell .held, #tf-grid-6H .cell .held,
+  #tf-grid-DAY .cell .held, #tf-grid-WEEK .cell .held, #tf-grid-MONTH .cell .held,
+  #spread-rows .row .held{
+    margin-top:10px; font-size:clamp(19px,4.2vw,30px); font-weight:900; letter-spacing:.14em;
+    color:#9fd8ff; display:none;
+  }
+  #tf-grid-1H .cell:not(.landed) .held, #tf-grid-4H .cell:not(.landed) .held,
+  #tf-grid-6H .cell:not(.landed) .held, #tf-grid-DAY .cell:not(.landed) .held,
+  #tf-grid-WEEK .cell:not(.landed) .held, #tf-grid-MONTH .cell:not(.landed) .held,
+  #spread-rows .row:not(.landed) .held{display:block;}
+  #tf-grid-1H .cell:not(.landed) .price, #tf-grid-1H .cell:not(.landed) .word,
+  #tf-grid-4H .cell:not(.landed) .price, #tf-grid-4H .cell:not(.landed) .word,
+  #tf-grid-6H .cell:not(.landed) .price, #tf-grid-6H .cell:not(.landed) .word,
+  #tf-grid-DAY .cell:not(.landed) .price, #tf-grid-DAY .cell:not(.landed) .word,
+  #tf-grid-WEEK .cell:not(.landed) .price, #tf-grid-WEEK .cell:not(.landed) .word,
+  #tf-grid-MONTH .cell:not(.landed) .price, #tf-grid-MONTH .cell:not(.landed) .word,
+  #spread-rows .row:not(.landed) .rprice, #spread-rows .row:not(.landed) .rspread,
+  #spread-rows .row:not(.landed) .rband{display:none;}
+  #tf-grid-1H .cell.landed .held, #tf-grid-4H .cell.landed .held,
+  #tf-grid-6H .cell.landed .held, #tf-grid-DAY .cell.landed .held,
+  #tf-grid-WEEK .cell.landed .held, #tf-grid-MONTH .cell.landed .held,
+  #spread-rows .row.landed .held{display:none;}
+  /* Sable's rows — the compass rose stands in the row; the 3M push keeps its
+     own line under the face (SPREAD ≠ PUSH: two facts, two places). */
+  #spread-rows .row{flex-direction:column; align-items:center; text-align:center;}
+  #spread-rows .rpush{margin-left:0; margin-top:8px; text-align:center;}
+  #spread-rows .cface .rcenter .rcoin{display:block; min-width:0; font-size:15px; letter-spacing:.24em;}
+  #spread-rows .cface .rcenter .rprice{display:block; min-width:0; margin-top:8px;
+    font-size:clamp(22px,4.4vw,32px); font-weight:800; color:#fff;}
+  #spread-rows .cface .rcenter .rspread{display:block; min-width:0; margin-top:6px; font-size:21px;}
+  #spread-rows .cface .rcenter .rband{display:block; margin-top:4px; font-size:17px;}
   .rows{display:flex; flex-direction:column; gap:9px;}
   .row{
     display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px;
@@ -1309,6 +1378,36 @@ function renderSurvey(symbol, read, live){
   }
 }
 
+/* ---------- SABLE'S SPREAD FACE (exception 11) — the compass rose ----------
+   Display only: her row's face. The row keeps its .rcoin/.rprice/.rspread/
+   .rband/.rpush DOM contract inside the face's center (Calla's seat reads
+   the spread figure + band off these elements); renderSpread adds the
+   "landed" class when her read lands. The face carries the SPREAD — figure
+   in its own sign color, band in its own color — and the 3M push keeps its
+   own line under the face. SPREAD ≠ PUSH: two facts, two places. */
+const CF_SPREAD_GLOW = "rgba(255,107,157,.55)";
+const CF_SPREAD_FACE =
+  '<svg viewBox="0 0 300 300" role="img" aria-label="6 hour spread compass rose face">' +
+  '<circle cx="150" cy="150" r="138" fill="rgba(255,107,157,0.04)" stroke="#ff6b9d" stroke-width="2"/>' +
+  '<circle cx="150" cy="150" r="126" fill="none" stroke="#ff6b9d" stroke-width="5" stroke-dasharray="2 11.19" opacity="0.75"/>' +
+  '<circle cx="150" cy="150" r="112" fill="none" stroke="#ff6b9d" stroke-width="1" opacity="0.55"/>' +
+  '<g class="anim cf-spin-slow" fill="#ff6b9d">' +
+  '<path d="M150 40 L161 150 L150 139 L139 150 Z" opacity="0.85"/>' +
+  '<path d="M150 260 L161 150 L150 161 L139 150 Z" opacity="0.5"/>' +
+  '<path d="M40 150 L150 139 L139 150 L150 161 Z" opacity="0.5"/>' +
+  '<path d="M260 150 L150 139 L161 150 L150 161 Z" opacity="0.85"/>' +
+  '<path d="M72 72 L157 143 L150 150 L143 157 Z" opacity="0.35"/>' +
+  '<path d="M228 72 L157 157 L150 150 L143 143 Z" opacity="0.35"/>' +
+  '<path d="M228 228 L143 157 L150 150 L157 143 Z" opacity="0.35"/>' +
+  '<path d="M72 228 L143 143 L150 150 L157 157 Z" opacity="0.35"/></g>' +
+  '<g class="anim cf-needle">' +
+  '<path d="M150 150 L128 44 A108 108 0 0 1 172 44 Z" fill="rgba(255,164,196,0.30)"/>' +
+  '<line x1="150" y1="150" x2="128" y2="46" stroke="#ffe3ee" stroke-width="3"/>' +
+  '<line x1="150" y1="150" x2="172" y2="46" stroke="#ffe3ee" stroke-width="3"/></g>' +
+  '<circle cx="150" cy="150" r="66" fill="none" stroke="#ff6b9d" stroke-width="1" stroke-dasharray="3 7" opacity="0.65"/>' +
+  '<circle cx="150" cy="150" r="6" fill="#04070a" stroke="#ff6b9d" stroke-width="2"/>' +
+  '<g font-family="monospace" font-size="12" fill="#ffa4c4" font-weight="600"><text x="106" y="38">BID</text><text x="176" y="38">ASK</text></g>' +
+  '<g font-family="monospace" font-size="11" fill="#ff6b9d" text-anchor="middle" letter-spacing="3"><text x="150" y="270">THE GAP IS THE READ</text></g></svg>';
 /* ---------- build SPREAD rows ---------- */
 const spreadRows = {};
 (function(){
@@ -1316,8 +1415,9 @@ const spreadRows = {};
   for(const s of SYMBOLS){
     const row = document.createElement("div");
     row.className = "row"; row.id = "spread-" + s;
-    row.innerHTML = '<span class="rcoin"></span><span class="rprice">—</span>' +
-                    '<span class="rspread">—</span><span class="rband">—</span>' +
+    row.innerHTML = '<div class="cface" style="--cfglow:' + CF_SPREAD_GLOW + '">' + CF_SPREAD_FACE +
+                    '<div class="rcenter"><span class="rcoin"></span><span class="rprice">—</span>' +
+                    '<span class="rspread">—</span><span class="rband">—</span><div class="held">HELD</div></div></div>' +
                     '<span class="rpush"></span>';
     row.querySelector(".rcoin").textContent = NAMES[s];
     wrap.appendChild(row);
@@ -1330,6 +1430,7 @@ const spreadRows = {};
 })();
 function renderSpread(symbol, live, spread, survey){
   const R = spreadRows[symbol];
+  R.row.classList.add("landed"); // CANDLE FACES (exception 11): a landed read lifts the HELD state
   R.price.textContent = fmtPrice(live);
   R.spread.textContent = fmtSpread(symbol, spread);
   R.spread.className = "rspread " + (spread >= 0 ? "pos" : "neg");
@@ -1577,6 +1678,84 @@ const TF_OFFICES = [
   {key:"DAY", iv:"1d"}, {key:"WEEK", iv:"1w"}, {key:"MONTH", iv:"1M"}
 ];
 const TF_FULL = {LTCUSDT:"Ł LITECOIN", BTCUSDT:"₿ BITCOIN", ETHUSDT:"Ξ ETHEREUM", SOLUSDT:"◎ SOLANA", BCHUSDT:"BCH BITCOIN CASH", BNBUSDT:"BNB"};
+/* ---------- CANDLE FACES (exception 11) — the offices' instrument faces ----------
+   Display only: the designs are the Warlord-approved preview faces, carried
+   onto the cells Sierra's radar pattern built. Each cell keeps its
+   .coin/.price/.word DOM contract inside the face's center; renderTf adds
+   the "landed" class when a read lands, exactly as renderSurvey does for
+   the radar. No new feeds, no new polls — the faces ride the existing reads. */
+function cfTicks(n, rO, rL, rS, w, color){
+  let s = "";
+  for(let i = 0; i < n; i++){
+    const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+    const big = i % (n / 4) === 0;
+    const rI = big ? rL : rS;
+    s += '<line x1="' + (150 + Math.cos(a) * rI).toFixed(1) + '" y1="' + (150 + Math.sin(a) * rI).toFixed(1) +
+      '" x2="' + (150 + Math.cos(a) * rO).toFixed(1) + '" y2="' + (150 + Math.sin(a) * rO).toFixed(1) +
+      '" stroke="' + color + '" stroke-width="' + (big ? w : 1) + '" opacity="' + (big ? 0.95 : 0.55) + '"/>';
+  }
+  return s;
+}
+const CF_GLOW = {
+  "1H": "rgba(47,224,189,.55)", "4H": "rgba(177,140,255,.55)", "6H": "rgba(255,179,71,.55)",
+  "DAY": "rgba(255,215,106,.55)", "WEEK": "rgba(74,222,128,.55)", "MONTH": "rgba(185,196,255,.55)"
+};
+const CF_FACES = {
+  "1H": '<svg viewBox="0 0 300 300" role="img" aria-label="1 hour compass dial face">' +
+    '<circle cx="150" cy="150" r="138" fill="rgba(47,224,189,0.04)" stroke="#2fe0bd" stroke-width="2"/>' +
+    '<circle cx="150" cy="150" r="112" fill="none" stroke="#2fe0bd" stroke-width="1" opacity="0.6"/>' +
+    '<g stroke="#2fe0bd" stroke-width="2"><line x1="150" y1="14" x2="150" y2="34"/><line x1="150" y1="266" x2="150" y2="286"/><line x1="14" y1="150" x2="34" y2="150"/><line x1="266" y1="150" x2="286" y2="150"/></g>' +
+    '<g stroke="#2fe0bd" stroke-width="1" opacity="0.55"><line x1="54" y1="54" x2="68" y2="68"/><line x1="232" y1="232" x2="246" y2="246"/><line x1="246" y1="54" x2="232" y2="68"/><line x1="68" y1="232" x2="54" y2="246"/></g>' +
+    '<g font-family="monospace" font-size="17" fill="#8ff5e0" text-anchor="middle" font-weight="600"><text x="150" y="60">N</text><text x="150" y="252">S</text><text x="248" y="156">E</text><text x="52" y="156">W</text></g>' +
+    '<g class="anim cf-spin-slow" opacity="0.5" fill="#2fe0bd"><path d="M150 44 L158 150 L150 130 L142 150 Z"/><path d="M150 256 L158 150 L150 170 L142 150 Z" opacity="0.6"/><path d="M44 150 L150 142 L130 150 L150 158 Z" opacity="0.6"/><path d="M256 150 L150 142 L170 150 L150 158 Z" opacity="0.6"/></g>' +
+    '<g class="anim cf-needle"><polygon points="150,58 156,150 144,150" fill="#eaf7ff"/><polygon points="150,242 156,150 144,150" fill="#159a83"/></g>' +
+    '<circle cx="150" cy="150" r="7" fill="#04070a" stroke="#2fe0bd" stroke-width="2"/></svg>',
+  "4H": '<svg viewBox="0 0 300 300" role="img" aria-label="4 hour gyroscope face">' +
+    '<circle cx="150" cy="150" r="140" fill="rgba(177,140,255,0.03)"/>' +
+    '<g class="anim cf-spin-med"><ellipse cx="150" cy="150" rx="132" ry="52" fill="none" stroke="#b18cff" stroke-width="2"/><circle cx="282" cy="150" r="5" fill="#d6c2ff"/></g>' +
+    '<g class="anim cf-spin-rev"><ellipse cx="150" cy="150" rx="52" ry="132" fill="none" stroke="#b18cff" stroke-width="1.5" opacity="0.8"/><circle cx="150" cy="18" r="4.5" fill="#d6c2ff"/></g>' +
+    '<g class="anim cf-spin-slow"><ellipse cx="150" cy="150" rx="118" ry="118" fill="none" stroke="#b18cff" stroke-width="1" stroke-dasharray="4 10" opacity="0.7"/></g>' +
+    '<g transform="rotate(38 150 150)"><ellipse cx="150" cy="150" rx="126" ry="40" fill="none" stroke="#7d5cd6" stroke-width="1.5" opacity="0.75"/></g>' +
+    '<g transform="rotate(-38 150 150)"><ellipse cx="150" cy="150" rx="126" ry="40" fill="none" stroke="#7d5cd6" stroke-width="1.5" opacity="0.75"/></g>' +
+    '<circle cx="150" cy="150" r="86" fill="none" stroke="#b18cff" stroke-width="0.75" opacity="0.35"/>' +
+    '<circle cx="150" cy="150" r="5" fill="#b18cff"/></svg>',
+  "6H": '<svg viewBox="0 0 300 300" role="img" aria-label="6 hour oscilloscope face">' +
+    '<rect x="18" y="34" width="264" height="232" rx="18" fill="rgba(255,179,71,0.04)" stroke="#ffb347" stroke-width="2"/>' +
+    '<g stroke="#ffb347" stroke-width="0.75" opacity="0.35"><line x1="84" y1="40" x2="84" y2="260"/><line x1="150" y1="40" x2="150" y2="260"/><line x1="216" y1="40" x2="216" y2="260"/><line x1="24" y1="93" x2="276" y2="93"/><line x1="24" y1="207" x2="276" y2="207"/></g>' +
+    '<line x1="24" y1="150" x2="276" y2="150" stroke="#ffb347" stroke-width="1" opacity="0.6"/>' +
+    '<path class="cf-wave" d="M-10 150 Q 20 96, 50 150 T 110 150 T 170 150 T 230 150 T 290 150 T 350 150" fill="none" stroke="#ffd28f" stroke-width="3" stroke-dasharray="12 8" stroke-linecap="round"/>' +
+    '<path d="M-10 150 Q 20 96, 50 150 T 110 150 T 170 150 T 230 150 T 290 150 T 350 150" fill="none" stroke="#ffb347" stroke-width="1" opacity="0.35"/>' +
+    '<g font-family="monospace" font-size="11" fill="#ffb347" letter-spacing="2"><text x="30" y="58">WAVE</text><text x="228" y="58">6H</text></g>' +
+    '<circle class="cf-pulse" cx="150" cy="150" r="88" fill="none" stroke="#ffb347" stroke-width="1"/></svg>',
+  "DAY": '<svg viewBox="0 0 300 300" role="img" aria-label="Day chronometer face">' +
+    '<circle cx="150" cy="150" r="138" fill="rgba(255,215,106,0.04)" stroke="#ffd76a" stroke-width="2"/>' +
+    '<g>' + cfTicks(24, 132, 114, 122, 2.5, "#ffd76a") + '</g>' +
+    '<path d="M 42 196 A 118 118 0 0 1 258 196" fill="none" stroke="#ffd76a" stroke-width="2.5" opacity="0.85"/>' +
+    '<g class="anim cf-spin-slow"><circle cx="150" cy="32" r="8" fill="#ffd76a"/><g stroke="#ffd76a" stroke-width="2"><line x1="150" y1="16" x2="150" y2="21"/><line x1="150" y1="43" x2="150" y2="48"/><line x1="134" y1="32" x2="139" y2="32"/><line x1="161" y1="32" x2="166" y2="32"/></g></g>' +
+    '<circle cx="150" cy="150" r="98" fill="none" stroke="#ffd76a" stroke-width="1" opacity="0.55"/>' +
+    '<circle cx="150" cy="150" r="64" fill="none" stroke="#ffd76a" stroke-width="0.75" stroke-dasharray="3 7" opacity="0.6"/>' +
+    '<g font-family="monospace" font-size="12" fill="#ffe9a8" text-anchor="middle"><text x="150" y="76">00</text><text x="150" y="238">12</text><text x="76" y="154">18</text><text x="224" y="154">06</text></g></svg>',
+  "WEEK": '<svg viewBox="0 0 300 300" role="img" aria-label="Week seven orbits face">' +
+    '<circle cx="150" cy="150" r="138" fill="rgba(74,222,128,0.03)" stroke="#4ade80" stroke-width="1.5"/>' +
+    '<ellipse cx="150" cy="150" rx="140" ry="56" fill="none" stroke="#2a9d5c" stroke-width="1" opacity="0.6" transform="rotate(-24 150 150)"/>' +
+    '<ellipse cx="150" cy="150" rx="140" ry="56" fill="none" stroke="#2a9d5c" stroke-width="1" opacity="0.45" transform="rotate(24 150 150)"/>' +
+    '<circle cx="150" cy="150" r="106" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="2 6" opacity="0.8"/>' +
+    '<g class="anim cf-spin-slow"><g fill="#9df0bb"><circle cx="256" cy="150" r="6"/><circle cx="224.7" cy="216.3" r="5"/><circle cx="164.7" cy="255.1" r="5"/><circle cx="92.5" cy="238.9" r="5"/><circle cx="47.9" cy="183.4" r="5"/><circle cx="60.9" cy="106.9" r="5"/></g><circle cx="117.6" cy="49.7" r="8" fill="#eaf7ff" stroke="#4ade80" stroke-width="2"/></g>' +
+    '<circle cx="150" cy="150" r="70" fill="none" stroke="#4ade80" stroke-width="0.75" opacity="0.4"/>' +
+    '<g font-family="monospace" font-size="11" fill="#4ade80" text-anchor="middle" letter-spacing="3"><text x="150" y="270">7 DAYS · 1 ORBIT</text></g></svg>',
+  "MONTH": '<svg viewBox="0 0 300 300" role="img" aria-label="Month lunar dial face">' +
+    '<circle cx="150" cy="150" r="138" fill="rgba(185,196,255,0.04)" stroke="#b9c4ff" stroke-width="2"/>' +
+    '<g>' + cfTicks(30, 132, 116, 124, 2, "#b9c4ff") + '</g>' +
+    '<g><circle cx="150" cy="38" r="11" fill="none" stroke="#e2e7ff" stroke-width="1.5"/>' +
+    '<circle cx="256" cy="94" r="11" fill="#e2e7ff" opacity="0.35"/><circle cx="256" cy="94" r="11" fill="none" stroke="#e2e7ff" stroke-width="1.5"/><path d="M256 83 A11 11 0 0 1 256 105 A7 11 0 0 0 256 83" fill="#e2e7ff"/>' +
+    '<circle cx="256" cy="206" r="11" fill="#e2e7ff"/>' +
+    '<circle cx="150" cy="262" r="11" fill="none" stroke="#e2e7ff" stroke-width="1.5"/><path d="M150 251 A11 11 0 0 0 150 273 A7 11 0 0 1 150 251" fill="#e2e7ff"/>' +
+    '<circle cx="44" cy="206" r="11" fill="#e2e7ff" opacity="0.35"/><circle cx="44" cy="206" r="11" fill="none" stroke="#e2e7ff" stroke-width="1.5"/><path d="M44 195 A11 11 0 0 0 44 217 A7 11 0 0 1 44 195" fill="#e2e7ff"/>' +
+    '<circle cx="44" cy="94" r="11" fill="#e2e7ff"/></g>' +
+    '<circle cx="150" cy="150" r="92" fill="none" stroke="#b9c4ff" stroke-width="1" opacity="0.55"/>' +
+    '<g class="cf-pulse"><circle cx="150" cy="150" r="60" fill="none" stroke="#b9c4ff" stroke-width="0.75" opacity="0.5"/></g>' +
+    '<g font-family="monospace" font-size="11" fill="#b9c4ff" text-anchor="middle" letter-spacing="3"><text x="150" y="234">30 TICKS · ONE MOON</text></g></svg>'
+};
 (function buildTfGrids(){
   for(const o of TF_OFFICES){
     const grid = document.getElementById("tf-grid-" + o.key);
@@ -1584,7 +1763,8 @@ const TF_FULL = {LTCUSDT:"Ł LITECOIN", BTCUSDT:"₿ BITCOIN", ETHUSDT:"Ξ ETHER
     for(const s of SYMBOLS){
       const cell = document.createElement("div");
       cell.className = "cell"; cell.id = "tf-" + o.key + "-" + s; cell.dataset.army = "";
-      cell.innerHTML = '<div class="coin"></div><div class="price">—</div><div class="word">READING…</div>';
+      cell.innerHTML = '<div class="cface" style="--cfglow:' + CF_GLOW[o.key] + '">' + CF_FACES[o.key] +
+        '<div class="rcenter"><div class="coin"></div><div class="price">—</div><div class="word">READING…</div><div class="held">HELD</div></div></div>';
       cell.querySelector(".coin").textContent = TF_FULL[s];
       grid.appendChild(cell);
     }
@@ -1597,6 +1777,7 @@ function renderTf(key, symbol, read, live){
   cell.querySelector(".price").textContent = fmtPrice(live);
   cell.querySelector(".word").textContent = read.word;
   cell.dataset.army = read.army;
+  cell.classList.add("landed"); // CANDLE FACES (exception 11): a landed read lifts the HELD state
   const prev = tfState[cell.id];
   if(!prev || prev.word !== read.word){
     cell.classList.remove("flash-green","flash-red");
