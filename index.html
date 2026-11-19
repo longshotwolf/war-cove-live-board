@@ -139,10 +139,13 @@
      the spread figure + band from Sable's rows). A cell or row that has not
      landed a read shows plain HELD on its face — never a stale word.
      Faces: 1H compass teal · 4H gyroscope violet · 6H oscilloscope amber ·
-     6H SPREAD compass rose (twin BID/ASK needles, the gap lit) · DAY
+     6H SPREAD bars — military gauge, restored original (exception 15
+     revision; the compass-rose dial of exception 11 is OUT) · DAY
      chronometer gold · WEEK seven orbits green · MONTH lunar dial silver-blue. */
   .cface{
-    position:relative; width:min(100%,150px); aspect-ratio:1/1; margin:2px auto 0;
+    /* Exception 15 (his order): the new faces step down once more —
+       150px -> 120px uniform. Sierra's radar is NOT in this shrink. */
+    position:relative; width:min(100%,120px); aspect-ratio:1/1; margin:2px auto 0;
     filter:drop-shadow(0 0 6px var(--cfglow, rgba(96,196,255,.45)));
     animation:cfFloat 6s ease-in-out infinite alternate;
   }
@@ -151,7 +154,7 @@
   .cface .rcenter{
     position:absolute; inset:0; z-index:5;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:15%; text-shadow:0 1px 8px rgba(0,10,20,.9); text-align:center;
+    padding:12%; text-shadow:0 1px 8px rgba(0,10,20,.9); text-align:center;
   }
   /* COMPACT SCALE + WORDING INSIDE THE DIAL (exception 13, the Warlord's
      correction, Nov 18, 2026 late call): the faces went in at radar size
@@ -163,15 +166,14 @@
      3M radar carries hers. The type steps down so a full read line
      fits the compact dial. Sierra's radar itself is NOT touched: her
      section's bytes are identical to the pre-faces build. */
-  .cface .rcenter .coin{font-size:11.5px; letter-spacing:.18em;}
-  .cface .rcenter .price{font-size:17px; margin-top:5px;}
+  .cface .rcenter .coin{font-size:10.5px; letter-spacing:.16em;}
+  .cface .rcenter .price{font-size:14.5px; margin-top:4px;}
   .cface .rcenter .word{
-    font-size:13px; margin-top:6px; min-height:0; line-height:1.3; letter-spacing:.03em;
+    font-size:11.5px; margin-top:5px; min-height:0; line-height:1.3; letter-spacing:.03em;
   }
   #tf-grid-1H .cell .cface .held, #tf-grid-4H .cell .cface .held,
   #tf-grid-6H .cell .cface .held, #tf-grid-DAY .cell .cface .held,
-  #tf-grid-WEEK .cell .cface .held, #tf-grid-MONTH .cell .cface .held,
-  #spread-rows .row .cface .held{font-size:13px; margin-top:6px; letter-spacing:.14em;}
+  #tf-grid-WEEK .cell .cface .held, #tf-grid-MONTH .cell .cface .held{font-size:11.5px; margin-top:6px; letter-spacing:.14em;}
   .cface .anim{transform-origin:150px 150px; transform-box:view-box;}
   .cf-spin-slow{animation:cfSpin 46s linear infinite;}
   .cf-spin-med{animation:cfSpin 16s linear infinite;}
@@ -204,24 +206,40 @@
   #tf-grid-WEEK .cell:not(.landed) .price, #tf-grid-WEEK .cell:not(.landed) .word,
   #tf-grid-MONTH .cell:not(.landed) .price, #tf-grid-MONTH .cell:not(.landed) .word,
   #spread-rows .row:not(.landed) .rprice, #spread-rows .row:not(.landed) .rspread,
-  #spread-rows .row:not(.landed) .rband, #spread-rows .row:not(.landed) .rpush{display:none;}
+  #spread-rows .row:not(.landed) .rband, #spread-rows .row:not(.landed) .rpush,
+  #spread-rows .row:not(.landed) .gauge{display:none;}
   #tf-grid-1H .cell.landed .held, #tf-grid-4H .cell.landed .held,
   #tf-grid-6H .cell.landed .held, #tf-grid-DAY .cell.landed .held,
   #tf-grid-WEEK .cell.landed .held, #tf-grid-MONTH .cell.landed .held,
   #spread-rows .row.landed .held{display:none;}
-  /* Sable's rows — ROWS again (exception 13): the rose stands in the row
-     at the compact scale, and EVERY word sits inside the dial's center —
-     coin, live price, the spread figure in its own sign color, the band
-     in its own color, and the 3M push as its own labeled line under
-     them, in its own army color. SPREAD ≠ PUSH: two facts, two lines,
-     both inside the dial — nothing worded outside the frame. */
-  #spread-rows .row{flex-direction:row; align-items:center; justify-content:center; text-align:center;}
-  #spread-rows .rpush{margin-left:0; margin-top:6px; text-align:center; font-size:11px; line-height:1.3;}
-  #spread-rows .cface .rcenter .rcoin{display:block; min-width:0; font-size:11.5px; letter-spacing:.18em;}
-  #spread-rows .cface .rcenter .rprice{display:block; min-width:0; margin-top:5px;
-    font-size:17px; font-weight:800; color:#fff;}
-  #spread-rows .cface .rcenter .rspread{display:block; min-width:0; margin-top:5px; font-size:15px;}
-  #spread-rows .cface .rcenter .rband{display:block; margin-top:3px; font-size:12px;}
+  /* Sable's HELD at bar size (exception 15 revision — her rows are bars
+     again, not dials; the clamp() size above is for the big cells). */
+  #spread-rows .row .held{font-size:12px; margin-top:0;}
+  /* Sable's rows — THE BARS ARE BACK (exception 15 REVISED, the
+     Warlord's word): "put the six hour spread bars back to their
+     original size… put them back to how they originally looked." The
+     compass-rose dial (exceptions 11/13) is OUT of her office; the row
+     is the original slim bar again (base .row rule — flex, ≈46px),
+     dressed as a military instrument: the ticked range gauge under the
+     figures (below). The information layout is the original: coin,
+     price, spread figure in its own sign color, band in its own color,
+     and the 3M push as its own line in its own army color. SPREAD ≠
+     PUSH: two facts, two lines. Calla's contract (.rspread/.rband/
+     .rpush) unchanged. */
+  /* SABLE 3x2 GRID (exception 15) — her six coin BARS stand in two rows
+     of three like every other office's grid (.grid3 metrics: repeat(3,1fr),
+     gap 12px, same 680px collapse), not one column of six. Container
+     layout only: the bars themselves keep their original size and look. */
+  #spread-rows{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  @media (max-width:680px){ #spread-rows{grid-template-columns:1fr;} }
+  /* The military instrument (exception 15 revision): a ticked range bar
+     in her rose family under the figures — zero at center, a marker
+     riding it. Marker position = the spread against the coin's
+     big-move line (center = zero, edges = the line, either way). */
+  #spread-rows .gauge{position:relative; flex:1 1 100%; height:7px; margin-top:5px; border-radius:3px;
+    background:repeating-linear-gradient(90deg, rgba(255,107,157,.55) 0 1px, transparent 1px 10%), rgba(255,107,157,.10);}
+  #spread-rows .gauge::before{content:""; position:absolute; left:50%; top:-2px; bottom:-2px; width:1.5px; background:rgba(255,227,238,.85);}
+  #spread-rows .gmark{position:absolute; top:-3px; bottom:-3px; width:3px; margin-left:-1.5px; border-radius:2px; background:#ffe3ee; box-shadow:0 0 6px rgba(255,107,157,.9);}
   .rows{display:flex; flex-direction:column; gap:9px;}
   .row{
     display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px;
@@ -459,8 +477,11 @@
         <div class="dgrade">Grade record: <b>still building</b>.</div>
       </div>
     </div>
-    <div class="tempbar" id="one-bar">NO 1M HIT LIT</div>
-    <div class="tempwrap"><div class="tgrid onegrid" id="one-grid"></div></div>
+    <!-- MINA ORIGINALS REMOVED (exception 15, his order): the pre-face
+         one-minute panel — the #one-bar light bar and the #one-grid cell
+         table — came out; the stopwatch dial set below is her office's
+         only face now. Her one-minute records still build (detached,
+         never displayed) because the dials drink from them. -->
 <style>
   /* ---------- MINA 1M STOPWATCH FACE (exception 13) — electric white-cyan ----------
      Display only, the special face the Warlord ordered for the one
@@ -480,11 +501,11 @@
   .mn-hand{transform-origin:150px 150px; transform-box:view-box; animation:mnSpin 60s linear infinite;}
   @keyframes mnSpin{to{transform:rotate(360deg);}}
   .cface .rcenter .mn-word{
-    margin-top:6px; font-size:12.5px; font-weight:900; letter-spacing:.05em; line-height:1.3;
+    margin-top:6px; font-size:11px; font-weight:900; letter-spacing:.05em; line-height:1.3;
     min-height:2.6em; display:flex; align-items:center; justify-content:center;
   }
   .cface .rcenter .mn-lvls{
-    margin-top:4px; font-size:10.5px; font-weight:700; font-variant-numeric:tabular-nums;
+    margin-top:4px; font-size:9.5px; font-weight:700; font-variant-numeric:tabular-nums;
     color:#cfe9da; min-height:1.2em;
   }
   #one-faces .cell .held{
@@ -589,7 +610,9 @@
      never an invented print. */
   #liq-grid .cell{position:relative;}
   .lqface{
-    position:relative; width:min(100%,150px); aspect-ratio:1/1; margin:2px auto 0;
+    /* Exception 15 (his order): the EKG steps down with the other new
+       faces — 150px -> 120px uniform. */
+    position:relative; width:min(100%,120px); aspect-ratio:1/1; margin:2px auto 0;
     filter:drop-shadow(0 0 6px rgba(255,45,120,.45));
     animation:cfFloat 6s ease-in-out infinite alternate;
     opacity:.45;
@@ -607,18 +630,18 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     padding:10%; text-shadow:0 1px 8px rgba(0,10,20,.9); text-align:center;
   }
-  .lq-coin{font-size:11.5px; letter-spacing:.18em; font-weight:700; color:#ffd3e4;}
+  .lq-coin{font-size:10.5px; letter-spacing:.18em; font-weight:700; color:#ffd3e4;}
   .lq-state{
-    margin-top:6px; font-size:13px; font-weight:900; letter-spacing:.05em;
+    margin-top:6px; font-size:11.5px; font-weight:900; letter-spacing:.05em;
     line-height:1.3; min-height:2.6em; display:flex; align-items:center; justify-content:center;
     color:#ff8fb8;
   }
   #liq-grid .cell.flat .lq-state{color:#ffffff;}
   .lq-price{
-    margin-top:3px; font-size:17px; font-weight:800;
+    margin-top:3px; font-size:14.5px; font-weight:800;
     font-variant-numeric:tabular-nums; color:#fff; min-height:1.2em;
   }
-  .lq-src{margin-top:3px; font-size:10px; font-weight:800; letter-spacing:.18em; color:#ff8fb8; min-height:1.2em;}
+  .lq-src{margin-top:3px; font-size:9.5px; font-weight:800; letter-spacing:.18em; color:#ff8fb8; min-height:1.2em;}
   .liq-srcbar{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:12px;}
   .liq-chip{
     padding:6px 12px; border:1.5px solid rgba(255,45,120,.4); border-radius:999px;
@@ -1509,37 +1532,16 @@ function renderSurvey(symbol, read, live){
   }
 }
 
-/* ---------- SABLE'S SPREAD FACE (exception 11) — the compass rose ----------
-   Display only: her row's face. The row keeps its .rcoin/.rprice/.rspread/
-   .rband/.rpush DOM contract inside the face's center (Calla's seat reads
-   the spread figure + band off these elements); renderSpread adds the
-   "landed" class when her read lands. The face carries the SPREAD — figure
-   in its own sign color, band in its own color — and the 3M push as its
-   own labeled line under them, INSIDE the dial (exception 13: nothing
-   worded outside the frame). SPREAD ≠ PUSH: two facts, two lines. */
-const CF_SPREAD_GLOW = "rgba(255,107,157,.55)";
-const CF_SPREAD_FACE =
-  '<svg viewBox="0 0 300 300" role="img" aria-label="6 hour spread compass rose face">' +
-  '<circle cx="150" cy="150" r="138" fill="rgba(255,107,157,0.04)" stroke="#ff6b9d" stroke-width="2"/>' +
-  '<circle cx="150" cy="150" r="126" fill="none" stroke="#ff6b9d" stroke-width="5" stroke-dasharray="2 11.19" opacity="0.75"/>' +
-  '<circle cx="150" cy="150" r="112" fill="none" stroke="#ff6b9d" stroke-width="1" opacity="0.55"/>' +
-  '<g class="anim cf-spin-slow" fill="#ff6b9d">' +
-  '<path d="M150 40 L161 150 L150 139 L139 150 Z" opacity="0.85"/>' +
-  '<path d="M150 260 L161 150 L150 161 L139 150 Z" opacity="0.5"/>' +
-  '<path d="M40 150 L150 139 L139 150 L150 161 Z" opacity="0.5"/>' +
-  '<path d="M260 150 L150 139 L161 150 L150 161 Z" opacity="0.85"/>' +
-  '<path d="M72 72 L157 143 L150 150 L143 157 Z" opacity="0.35"/>' +
-  '<path d="M228 72 L157 157 L150 150 L143 143 Z" opacity="0.35"/>' +
-  '<path d="M228 228 L143 157 L150 150 L157 143 Z" opacity="0.35"/>' +
-  '<path d="M72 228 L143 143 L150 150 L157 157 Z" opacity="0.35"/></g>' +
-  '<g class="anim cf-needle">' +
-  '<path d="M150 150 L128 44 A108 108 0 0 1 172 44 Z" fill="rgba(255,164,196,0.30)"/>' +
-  '<line x1="150" y1="150" x2="128" y2="46" stroke="#ffe3ee" stroke-width="3"/>' +
-  '<line x1="150" y1="150" x2="172" y2="46" stroke="#ffe3ee" stroke-width="3"/></g>' +
-  '<circle cx="150" cy="150" r="66" fill="none" stroke="#ff6b9d" stroke-width="1" stroke-dasharray="3 7" opacity="0.65"/>' +
-  '<circle cx="150" cy="150" r="6" fill="#04070a" stroke="#ff6b9d" stroke-width="2"/>' +
-  '<g font-family="monospace" font-size="12" fill="#ffa4c4" font-weight="600"><text x="106" y="38">BID</text><text x="176" y="38">ASK</text></g>' +
-  '<g font-family="monospace" font-size="11" fill="#ff6b9d" text-anchor="middle" letter-spacing="3"><text x="150" y="270">THE GAP IS THE READ</text></g></svg>';
+/* ---------- SABLE'S SPREAD BARS (exception 15 REVISED) ----------
+   The compass-rose dial of exceptions 11/13 is OUT of her office on the
+   Warlord's word — the rows are the ORIGINAL slim bars again, dressed as
+   a military instrument: a ticked range gauge under the figures with a
+   marker riding it (position = spread against the coin's big-move
+   line). The row keeps its .rcoin/.rprice/.rspread/.rband/.rpush DOM
+   contract (Calla's seat reads the spread figure + band off these
+   elements); renderSpread adds the "landed" class when her read lands.
+   SPREAD ≠ PUSH: the spread in its own sign color + band, the 3M push
+   as its own labeled line in its own army color. */
 /* ---------- build SPREAD rows ---------- */
 const spreadRows = {};
 (function(){
@@ -1547,16 +1549,17 @@ const spreadRows = {};
   for(const s of SYMBOLS){
     const row = document.createElement("div");
     row.className = "row"; row.id = "spread-" + s;
-    row.innerHTML = '<div class="cface" style="--cfglow:' + CF_SPREAD_GLOW + '">' + CF_SPREAD_FACE +
-                    '<div class="rcenter"><span class="rcoin"></span><span class="rprice">—</span>' +
-                    '<span class="rspread">—</span><span class="rband">—</span><span class="rpush"></span><div class="held">HELD</div></div></div>';
+    row.innerHTML = '<span class="rcoin"></span><span class="rprice">—</span>' +
+                    '<span class="rspread">—</span><span class="rband">—</span><span class="rpush"></span>' +
+                    '<div class="gauge"><div class="gmark"></div></div><div class="held">HELD</div>';
     row.querySelector(".rcoin").textContent = NAMES[s];
     wrap.appendChild(row);
     spreadRows[s] = { row,
       price: row.querySelector(".rprice"),
       spread: row.querySelector(".rspread"),
       band: row.querySelector(".rband"),
-      push: row.querySelector(".rpush") };
+      push: row.querySelector(".rpush"),
+      gmark: row.querySelector(".gmark") };
   }
 })();
 function renderSpread(symbol, live, spread, survey){
@@ -1566,6 +1569,10 @@ function renderSpread(symbol, live, spread, survey){
   R.spread.textContent = fmtSpread(symbol, spread);
   R.spread.className = "rspread " + (spread >= 0 ? "pos" : "neg");
   R.band.textContent = bandWord(symbol, spread);
+  /* Military gauge: the marker rides the ticked range bar — center is
+     zero, the edges are the coin's big-move line either way. */
+  const frac = Math.max(-1, Math.min(1, spread / BIGMOVE[symbol]));
+  R.gmark.style.left = (50 + frac * 50) + "%";
   if(survey){
     R.push.innerHTML = '<span class="plabel">3M PUSH&nbsp;&nbsp;</span>' +
       survey.word.replace(/^(GREEN|RED) ARMY /, "");
@@ -1648,7 +1655,12 @@ const tempCells = {}; // "bottom|LTCUSDT|MONTH" -> cell record
 /* ---------- ONE MINUTE grid — bottom + top per coin ---------- */
 const oneCells = {}; // "one|bottom|LTCUSDT" -> cell record
 (function buildOneGrid(){
-  const grid = document.getElementById("one-grid");
+  // Exception 15: the original #one-grid table is out of the page (his
+  // order — the stopwatch dials are her only face now). The records
+  // still build into a detached holder, never displayed: the dial set
+  // drinks from these oneCells, and her machinery writes to them as
+  // always. Her read, feed and poll are untouched.
+  const grid = document.getElementById("one-grid") || document.createElement("div");
   const corner = document.createElement("div");
   corner.className = "thead"; corner.textContent = "COIN";
   grid.appendChild(corner);
@@ -1728,14 +1740,16 @@ function oneRenderLights(){
     if(c.lit && (!litCell || (c.record && litCell.record && c.record.time > litCell.record.time))) litCell = c;
   }
   const sec = document.getElementById("temp-one");
-  const bar = document.getElementById("one-bar");
+  const bar = document.getElementById("one-bar"); // exception 15: the bar is out of the page; guarded
   sec.classList.toggle("glow-b", !!litCell && litCell.side === "bottom");
   sec.classList.toggle("glow-t", !!litCell && litCell.side === "top");
-  bar.classList.toggle("lit-b", !!litCell && litCell.side === "bottom");
-  bar.classList.toggle("lit-t", !!litCell && litCell.side === "top");
-  bar.textContent = litCell
-    ? "💡 1M HIT LIT — " + NAMES[litCell.symbol] + " " + (litCell.side === "bottom" ? "BOTTOM" : "TOP")
-    : "NO 1M HIT LIT";
+  if(bar){
+    bar.classList.toggle("lit-b", !!litCell && litCell.side === "bottom");
+    bar.classList.toggle("lit-t", !!litCell && litCell.side === "top");
+    bar.textContent = litCell
+      ? "💡 1M HIT LIT — " + NAMES[litCell.symbol] + " " + (litCell.side === "bottom" ? "BOTTOM" : "TOP")
+      : "NO 1M HIT LIT";
+  }
 }
 
 /* ---------- FOUR POINTS panel — the big 3 × MONTH · WEEK · DAY · 6H ---------- */
