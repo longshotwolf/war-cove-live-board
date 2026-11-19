@@ -2304,7 +2304,7 @@ function send(path){if(!ep)return;try{fetch(ep+path+"?page="+encodeURIComponent(
 function discover(){try{fetch(DOC+"?cb="+Date.now(),{mode:"cors",cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(j&&j.counter){ep=j.counter;if(!viewed)send("/view");}}).catch(function(){});}catch(e){}}
 discover();
 setInterval(function(){if(ep){if(!viewed)send("/view");else send("/beat");}else discover();},20000);
-}catch(e){})();})();
+}catch(e){}})();
 </script>
 <!-- /WC-LINK-COUNTER -->
 </body>
