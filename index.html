@@ -647,13 +647,15 @@
      price and the side (LONG LIQUIDATED / SHORT LIQUIDATED) in the
      center — holds a few seconds, then the pulse resumes. When no
      liquidation is live the center reads NO LIQUIDATION in plain
-     words. Feed: the public liquidation streams of Binance · Bybit ·
-     OKX — the ONE sanctioned exception to the house Bitunix-only rule
-     (the Warlord's word, Nov 18, 2026: Bitunix publishes no
-     liquidation stream, so this office drinks from the same river
-     Newhedge drinks from). A source that will not connect shows HELD
-     on its chip — and if no source is live the faces read HELD —
-     never an invented print. */
+     words. Feed (exception 17, the Warlord's ruling, Nov 19, 2026):
+     NEWHEDGE — the liquidation prints Newhedge shows on its
+     battlefield page (the same Binance · Bybit · OKX prints this
+     office first drank direct, until Binance read 451 and Bybit 403
+     from this house), carried to this page by the house liquidation
+     relay as feed/liq.json. Still the ONE sanctioned exception to
+     the house Bitunix-only rule (Bitunix publishes no liquidation
+     stream). If the relay's read of Newhedge goes stale the chip
+     and the faces read HELD — never an invented print. */
   #liq-grid .cell{position:relative;}
   .lqface{
     /* Exception 15 (his order): the EKG steps down with the other new
@@ -701,14 +703,12 @@
       <div>
         <div class="dname">THE LIQUIDATION OFFICE</div>
         <div class="djob">Liquidation Watch — Forced Closings, As They Print</div>
-        <div class="dgrade">Feed: the public liquidation streams of <b>BINANCE · BYBIT · OKX</b> — the same river Newhedge drinks from. This is the ONE office that does not drink Bitunix, by the Warlord's word (Nov 18, 2026): Bitunix publishes no liquidation stream, so on his question and his word this office drinks Binance, Bybit and OKX. Display only: when a liquidation prints, the coin's pulse flatlines with the print — the coin, the price, the side. When none prints, the office reads NO LIQUIDATION. A source that will not connect reads HELD — never an invented print.</div>
+        <div class="dgrade">Feed: <b>NEWHEDGE</b> — the liquidation prints Newhedge shows on its battlefield page, carried to this board by the house liquidation relay. This office first drank the Binance · Bybit · OKX streams direct (the Warlord's word, Nov 18, 2026 — Bitunix publishes no liquidation stream, so this is the ONE office that does not drink Bitunix); when Binance read 451 and Bybit 403 from this house, the Warlord ruled (Nov 19, 2026): drink from Newhedge instead of fighting the block. The prints are the ones Newhedge shows — its battlefield is a Bitcoin page, so the prints are BTC, each with its exchange, its price and its side named on the face. Display only: when a liquidation prints, the coin's pulse flatlines with the print — the coin, the price, the side. When none prints, the office reads NO LIQUIDATION. If the Newhedge read goes stale, the office reads HELD — never an invented print.</div>
       </div>
     </div>
     <div class="grid3" id="liq-grid"></div>
     <div class="liq-srcbar">
-      <span class="liq-chip" id="liqsrc-binance">BINANCE · HELD</span>
-      <span class="liq-chip" id="liqsrc-bybit">BYBIT · HELD</span>
-      <span class="liq-chip" id="liqsrc-okx">OKX · HELD</span>
+      <span class="liq-chip" id="liqsrc-newhedge">NEWHEDGE · HELD</span>
     </div>
   </section>
 
@@ -2102,20 +2102,26 @@ function bigFlashPump(){
 }
 </script>
 <script>
-/* ---------- LIQUIDATION OFFICE (lock exception 12, Nov 18 2026) ----------
-   Display-only. One EKG face per coin (the house six), built here and
-   fed by the three public liquidation streams Newhedge drinks from —
-   Binance · Bybit · OKX — connected browser-side, one at a time, in
-   that order (his one-at-a-time law). This office is the ONE sanctioned
-   exception to the house Bitunix-only rule, by the Warlord's word:
-   Bitunix publishes no liquidation stream. Each stream connects
-   independently and reconnects with backoff; a stream that will not
-   connect shows HELD on its chip, and if no stream is live the faces
-   read HELD — never an invented print. When a liquidation prints for
-   a coin, that coin's trace flatlines for a few seconds with the coin,
-   the liquidation price and the side in the center; then the pulse
-   resumes and the center reads NO LIQUIDATION again. No other room,
-   read, feed or poll on this board is touched. */
+/* ---------- LIQUIDATION OFFICE (lock exception 12, Nov 18 2026;
+   feed rewired by exception 17, Nov 19 2026) ----------
+   Display-only. One EKG face per coin (the house six), built here.
+   FEED (exception 17 — the Warlord's ruling, Nov 19, 2026): the
+   office no longer opens the Binance · Bybit · OKX streams direct —
+   Binance answers 451 and Bybit 403 from this house. It drinks the
+   liquidation prints NEWHEDGE shows on its battlefield page,
+   carried same-origin by the house liquidation relay
+   (feed/liq.json, republished when the battlefield watch's settled
+   read brings a new print). This office stays the ONE sanctioned
+   exception to the house Bitunix-only rule: Bitunix publishes no
+   liquidation stream. The lane reads LIVE only while the relay's
+   Newhedge read is fresh (the watch timestamp, re-checked against
+   this page's own clock on every poll); stale or unreachable reads
+   HELD on the chip and on the faces — never an invented print.
+   When a liquidation prints for a coin, that coin's trace flatlines
+   for a few seconds with the coin, the liquidation price and the
+   side in the center; then the pulse resumes and the center reads
+   NO LIQUIDATION again. No other room, read, feed or poll on this
+   board is touched. */
 (function(){
   "use strict";
   var LQ_COLOR = "#ff2d78";
@@ -2143,8 +2149,8 @@ function bigFlashPump(){
       '<g font-family="monospace" font-size="11" fill="' + LQ_COLOR + '" text-anchor="middle" letter-spacing="3"><text x="150" y="270">LIQUIDATIONS</text></g></svg>';
   }
   var liqFlat = {}; // symbol -> timeout id while flatlined
-  var liqSrc = { binance:{up:false}, bybit:{up:false}, okx:{up:false} };
-  function liqAnyUp(){ return liqSrc.binance.up || liqSrc.bybit.up || liqSrc.okx.up; }
+  var liqSrc = { newhedge:{up:false} };
+  function liqAnyUp(){ return liqSrc.newhedge.up; }
   (function buildLiqGrid(){
     var grid = document.getElementById("liq-grid");
     if(!grid) return;
@@ -2192,85 +2198,38 @@ function bigFlashPump(){
       liqUpdateFaces();
     }, 5000);
   }
-  function liqConnect(name, url, onOpen, onMsg){
-    var st = liqSrc[name];
-    var delay = 1000, pingTimer = null;
-    function schedule(){
-      setTimeout(attempt, delay);
-      delay = Math.min(delay * 2, 30000);
-    }
-    function attempt(){
-      var ws;
-      try{ ws = new WebSocket(url); }catch(e){ schedule(); return; }
-      ws.onopen = function(){
-        st.up = true; delay = 1000;
+  var liqSeen = {}; // print id -> true, every print this page has shown
+  function liqPoll(){
+    fetch("feed/liq.json?cb=" + Date.now(), { cache:"no-store" })
+      .then(function(r){ if(!r.ok) throw new Error("liq " + r.status); return r.json(); })
+      .then(function(j){
+        var wt = Date.parse(j.watch_ts || "");
+        var fresh = j.feed === "live" && isFinite(wt) &&
+                    (Date.now() - wt) <= 90 * 60 * 1000;
+        liqSrc.newhedge.up = !!fresh;
         liqUpdateSrc(); liqUpdateFaces();
-        if(onOpen){ var t = onOpen(ws); if(t) pingTimer = t; }
-      };
-      ws.onmessage = function(ev){
-        if(ev.data === "pong") return;
-        try{ onMsg(JSON.parse(ev.data)); }catch(e){ /* a bad frame never stops the office */ }
-      };
-      ws.onclose = function(){
-        st.up = false;
-        if(pingTimer){ clearInterval(pingTimer); pingTimer = null; }
+        if(!fresh || !Array.isArray(j.prints)) return;
+        var newest = null;
+        for(var i = 0; i < j.prints.length; i++){
+          var p = j.prints[i];
+          if(!p || !p.id || liqSeen[p.id]) continue;
+          liqSeen[p.id] = true;
+          if(!newest) newest = p; // the relay publishes newest-first
+        }
+        if(newest && isFinite(newest.price)){
+          liqPrint(newest.symbol, newest.side, newest.price,
+                   newest.exchange || "NEWHEDGE");
+        }
+      })
+      .catch(function(){
+        liqSrc.newhedge.up = false;
         liqUpdateSrc(); liqUpdateFaces();
-        schedule();
-      };
-      ws.onerror = function(){ try{ ws.close(); }catch(e){} };
-    }
-    attempt();
-  }
-  function liqOnBinance(j){
-    if(!j || j.e !== "forceOrder" || !j.o) return;
-    var o = j.o;
-    if(SYMBOLS.indexOf(o.s) < 0) return;
-    var price = parseFloat(o.ap) || parseFloat(o.p);
-    if(!isFinite(price)) return;
-    liqPrint(o.s, o.S === "SELL" ? "LONG LIQUIDATED" : "SHORT LIQUIDATED", price, "BINANCE");
-  }
-  function liqOnBybit(j){
-    if(!j || !j.topic || j.topic.indexOf("liquidation.") !== 0) return;
-    var rows = Array.isArray(j.data) ? j.data : [j.data];
-    for(var i = 0; i < rows.length; i++){
-      var d = rows[i];
-      if(!d || SYMBOLS.indexOf(d.symbol) < 0) continue;
-      var price = parseFloat(d.price);
-      if(!isFinite(price)) continue;
-      liqPrint(d.symbol, d.side === "Sell" ? "LONG LIQUIDATED" : "SHORT LIQUIDATED", price, "BYBIT");
-    }
-  }
-  function liqOnOkx(j){
-    if(!j || !j.arg || j.arg.channel !== "liquidation-orders" || !Array.isArray(j.data)) return;
-    for(var i = 0; i < j.data.length; i++){
-      var row = j.data[i];
-      var sym = (row.instId || "").split("-")[0] + "USDT";
-      if(SYMBOLS.indexOf(sym) < 0) continue;
-      var details = row.details || [];
-      for(var k = 0; k < details.length; k++){
-        var price = parseFloat(details[k].bkPx);
-        if(!isFinite(price)) continue;
-        liqPrint(sym, details[k].posSide === "long" ? "LONG LIQUIDATED" : "SHORT LIQUIDATED", price, "OKX");
-      }
-    }
+      });
   }
   liqUpdateSrc();
   liqUpdateFaces();
-  try{
-    liqConnect("binance", "wss://fstream.binance.com/ws/!forceOrder@arr", null, liqOnBinance);
-    setTimeout(function(){
-      liqConnect("bybit", "wss://stream.bybit.com/v5/public/linear", function(ws){
-        try{ ws.send(JSON.stringify({ op:"subscribe", args: SYMBOLS.map(function(s){ return "liquidation." + s; }) })); }catch(e){}
-        return setInterval(function(){ try{ ws.send(JSON.stringify({ op:"ping" })); }catch(e){} }, 20000);
-      }, liqOnBybit);
-    }, 700);
-    setTimeout(function(){
-      liqConnect("okx", "wss://ws.okx.com:8443/ws/v5/public", function(ws){
-        try{ ws.send(JSON.stringify({ op:"subscribe", args:[{ channel:"liquidation-orders", instType:"SWAP" }] })); }catch(e){}
-        return setInterval(function(){ try{ ws.send("ping"); }catch(e){} }, 25000);
-      }, liqOnOkx);
-    }, 1400);
-  }catch(e){ /* no WebSocket in this browser: the office stays HELD, never invented */ }
+  setTimeout(liqPoll, 4000);
+  setInterval(liqPoll, 20000);
 })();
 </script>
 <script>
