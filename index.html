@@ -292,6 +292,82 @@
   .tcell.lit-b .tstate{color:#ffd9de;}
   .tcell.lit-t{animation:flashEm .9s ease-in-out infinite; border-color:rgba(34,255,136,.9);}
   .tcell.lit-t .tstate{color:#d9ffe9;}
+  /* ---------- TERRA / VEGA RADAR WINDOWS (exception 16, his order Nov 19, 2026) ----------
+     Display only: radar technology INSIDE Terra's and Vega's existing
+     windows. The Warlord's size law stands — the windows keep their exact
+     size, position and footprint; only the inside of each temp cell
+     changes. The radar is an absolutely-positioned backdrop layer (it
+     contributes nothing to layout), in Sierra's blue hologram-energy
+     family with each office's own identity: Terra's sweep turns
+     clockwise in emerald (she sweeps the downside for temp BOTTOMS),
+     Vega's turns counter-clockwise in rose (she mirrors for temp TOPS).
+     Dead center of each radar rides the cell's existing readout — the
+     coin, the office's forming-HA temp level, and the distance to it —
+     painted by the same tempRenderCell off the same tempCells records:
+     no new feed, no new level computation, no new poll. On a temp HIT
+     the radar's ring flashes the army color (green for a bottom hit,
+     red for a top hit) alongside — never instead of — the cell's own
+     existing hit flash. A cell whose read has not landed shows HELD on
+     its radar, the same law as every other office. */
+  #bot-grid .tcell, #top-grid .tcell{position:relative; overflow:hidden;}
+  #bot-grid .tcell .tradar, #top-grid .tcell .tradar{
+    position:absolute; left:50%; top:50%; height:118%; aspect-ratio:1/1;
+    transform:translate(-50%,-50%); border-radius:50%; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(120,220,255,.16) 0%, rgba(40,140,255,.08) 34%, rgba(6,18,34,.10) 72%),
+      repeating-radial-gradient(circle at 50% 50%, rgba(96,196,255,.20) 0 1.5px, transparent 1.5px 25%);
+    box-shadow:inset 0 0 22px rgba(64,170,255,.25), inset 0 0 55px rgba(30,110,255,.12);
+    overflow:hidden;
+  }
+  #bot-grid .tcell .tradar{border:1.5px solid rgba(34,255,136,.45);}
+  #top-grid .tcell .tradar{border:1.5px solid rgba(251,113,133,.45);}
+  #bot-grid .tcell .tradar::before, #bot-grid .tcell .tradar::after,
+  #top-grid .tcell .tradar::before, #top-grid .tcell .tradar::after{
+    content:""; position:absolute; background:rgba(96,196,255,.28); z-index:1;
+  }
+  #bot-grid .tcell .tradar::before, #top-grid .tcell .tradar::before{left:50%; top:0; width:1.5px; height:100%; transform:translateX(-50%);}
+  #bot-grid .tcell .tradar::after, #top-grid .tcell .tradar::after{top:50%; left:0; height:1.5px; width:100%; transform:translateY(-50%);}
+  #bot-grid .tcell .tradar .sweep, #top-grid .tcell .tradar .sweep{
+    position:absolute; inset:0; border-radius:50%; z-index:2;
+    animation:radarSpin 4.5s linear infinite;
+  }
+  #bot-grid .tcell .tradar .sweep{background:conic-gradient(from 0deg, rgba(120,255,180,.65), rgba(60,220,150,.20) 45deg, transparent 85deg);}
+  #top-grid .tcell .tradar .sweep{background:conic-gradient(from 0deg, rgba(255,150,170,.65), rgba(240,90,120,.20) 45deg, transparent 85deg); animation-direction:reverse;}
+  #bot-grid .tcell .tradar .core, #top-grid .tcell .tradar .core{
+    position:absolute; left:50%; top:50%; width:46%; height:46%; z-index:2;
+    transform:translate(-50%,-50%); border-radius:50%;
+    background:radial-gradient(circle, rgba(190,240,255,.42) 0%, rgba(90,190,255,.18) 45%, transparent 72%);
+    filter:blur(1px);
+  }
+  #bot-grid .tcell .tradar .tring, #top-grid .tcell .tradar .tring{
+    position:absolute; inset:0; border-radius:50%; z-index:3;
+    border:2.5px solid transparent;
+  }
+  #bot-grid .tcell.lit-b .tradar .tring{animation:trFlashG .9s ease-in-out infinite;}
+  #top-grid .tcell.lit-t .tradar .tring{animation:trFlashR .9s ease-in-out infinite;}
+  @keyframes trFlashG{0%,100%{border-color:rgba(34,255,136,.12); box-shadow:inset 0 0 10px rgba(34,255,136,.04);}50%{border-color:rgba(34,255,136,.95); box-shadow:0 0 16px rgba(34,255,136,.55), inset 0 0 20px rgba(34,255,136,.30);}}
+  @keyframes trFlashR{0%,100%{border-color:rgba(255,68,85,.12); box-shadow:inset 0 0 10px rgba(255,68,85,.04);}50%{border-color:rgba(255,68,85,.95); box-shadow:0 0 16px rgba(255,68,85,.55), inset 0 0 20px rgba(255,68,85,.30);}}
+  #bot-grid .tcell .tlvlrow, #top-grid .tcell .tlvlrow{
+    position:relative; z-index:2; white-space:nowrap;
+    font-size:15.5px; font-weight:800; color:#fff; text-shadow:0 1px 6px rgba(0,10,20,.9);
+  }
+  #bot-grid .tcell .tcn, #top-grid .tcell .tcn{
+    font-size:9.5px; font-weight:800; letter-spacing:.18em; color:#9fd8ff;
+    margin-right:6px; vertical-align:2px;
+  }
+  #bot-grid .tcell .tstate, #top-grid .tcell .tstate,
+  #bot-grid .tcell .trec, #top-grid .tcell .trec{
+    position:relative; z-index:2; text-shadow:0 1px 6px rgba(0,10,20,.9);
+  }
+  #bot-grid .tcell .theld-label, #top-grid .tcell .theld-label{
+    position:absolute; inset:0; z-index:3; display:none;
+    align-items:center; justify-content:center;
+    font-size:13px; font-weight:900; letter-spacing:.14em; color:#9fd8ff;
+    text-shadow:0 1px 8px rgba(0,10,20,.9);
+  }
+  #bot-grid .tcell.theld .theld-label, #top-grid .tcell.theld .theld-label{display:flex;}
+  #bot-grid .tcell.theld .tlvlrow, #bot-grid .tcell.theld .tstate, #bot-grid .tcell.theld .trec,
+  #top-grid .tcell.theld .tlvlrow, #top-grid .tcell.theld .tstate, #top-grid .tcell.theld .trec{visibility:hidden;}
   /* ---------- FOUR POINTS ---------- */
   .fpline{
     display:flex; justify-content:space-between; gap:8px; padding:1px 2px;
@@ -1682,8 +1758,10 @@ const tempCells = {}; // "bottom|LTCUSDT|MONTH" -> cell record
       grid.appendChild(c);
       for(const f of FRAMES){
         const el = document.createElement("div");
-        el.className = "tcell";
-        el.innerHTML = '<div class="tlvl">—</div><div class="tstate">READING…</div><div class="trec"></div>';
+        el.className = "tcell theld";
+        el.innerHTML = '<div class="tradar"><div class="sweep"></div><div class="core"></div><div class="tring"></div></div>' +
+          '<div class="tlvlrow"><span class="tcn">' + NAMES[s] + '</span><span class="tlvl">—</span></div>' +
+          '<div class="tstate">READING…</div><div class="trec"></div><div class="theld-label">HELD</div>';
         grid.appendChild(el);
         tempCells[side + "|" + s + "|" + f.key] = {
           side, symbol:s, frame:f.key, el,
@@ -1737,6 +1815,7 @@ const oneCells = {}; // "one|bottom|LTCUSDT" -> cell record
 })();
 
 function tempRenderCell(cell){
+  cell.el.classList.toggle("theld", cell.level == null); // radar HELD state (exception 16) — display only
   cell.lvlEl.textContent = fmtPrice(cell.level);
   if(cell.state === "through"){
     cell.stateEl.textContent = "THROUGH — NOT HOLDING";
