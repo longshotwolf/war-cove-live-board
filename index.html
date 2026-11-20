@@ -2411,7 +2411,21 @@ function bigFlashPump(){
       F.cell.classList.add("landed");
       F.lvls.textContent = "B " + fmtPrice(b.level) + " · T " + fmtPrice(t.level);
       var word, color;
-      if(b.state === "hit"){ word = "BOTTOM HIT — PRICE ON IT"; color = "#fb7185"; }
+      // MINA BOTH-HIT GUARD (lock exception 24, Nov 20 2026 — Warlord's word:
+      // "go over everything and get it done"). The 1-minute forming HA candle
+      // is narrower than two hit-bands (measured Nov 20, 2026: 0.095–0.159%
+      // wide on all six coins, HIT_BAND 0.15%), so live price sits inside the
+      // band of BOTH the 1m bottom and the 1m top at once, and both oneCells
+      // read "hit" together. The old bottom-first check then always printed
+      // BOTTOM HIT, even mid-candle. When both are hit, no single hit word
+      // is true: show the nearer level's distance instead (the existing
+      // distance wording). A single-side hit still prints as before. Levels,
+      // bands, records, bells and all other offices are untouched; if neither
+      // level has landed the face still reads HELD.
+      var bothHit = (b.state === "hit" && t.state === "hit");
+      if(bothHit && b.dist != null && (t.dist == null || Math.abs(b.dist) <= Math.abs(t.dist))){ word = b.dist.toFixed(2) + "% FROM THE BOTTOM"; color = "#8fb8a2"; }
+      else if(bothHit && t.dist != null){ word = t.dist.toFixed(2) + "% FROM THE TOP"; color = "#8fb8a2"; }
+      else if(b.state === "hit"){ word = "BOTTOM HIT — PRICE ON IT"; color = "#fb7185"; }
       else if(t.state === "hit"){ word = "TOP HIT — PRICE ON IT"; color = "#22ff88"; }
       else if(b.state === "through" || t.state === "through"){ word = "THROUGH — NOT HOLDING"; color = "#ffb3ab"; }
       else if(b.dist != null && (t.dist == null || Math.abs(b.dist) <= Math.abs(t.dist))){ word = b.dist.toFixed(2) + "% FROM THE BOTTOM"; color = "#8fb8a2"; }
