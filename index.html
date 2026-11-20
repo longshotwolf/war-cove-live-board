@@ -1554,14 +1554,21 @@ const PIERCE_BAND = 0.0005; // more than 0.05% through it = through
 const TEMP_FLASH_MS = 60000;
 
 function tempHitState(side, live, level){
+  // Exception 27 (Nov 20, 2026): the distance to the level is returned on
+  // EVERY state — hit and through as well as clear — never left blank.
+  // Mina's both-hit guard in mnPaint reads b.dist / t.dist to choose the
+  // nearer level; before this the hit return carried no dist at all, so
+  // the guard could never fire and both-hit always printed BOTTOM HIT.
   if(side === "bottom"){
-    if(live < level * (1 - PIERCE_BAND)) return {state:"through"};
-    if(live <= level * (1 + HIT_BAND)) return {state:"hit"};
-    return {state:"clear", dist:(live - level) / level * 100};
+    const dist = Math.abs(live - level) / level * 100;
+    if(live < level * (1 - PIERCE_BAND)) return {state:"through", dist};
+    if(live <= level * (1 + HIT_BAND)) return {state:"hit", dist};
+    return {state:"clear", dist};
   }
-  if(live > level * (1 + PIERCE_BAND)) return {state:"through"};
-  if(live >= level * (1 - HIT_BAND)) return {state:"hit"};
-  return {state:"clear", dist:(level - live) / level * 100};
+  const dist = Math.abs(level - live) / level * 100;
+  if(live > level * (1 + PIERCE_BAND)) return {state:"through", dist};
+  if(live >= level * (1 - HIT_BAND)) return {state:"hit", dist};
+  return {state:"clear", dist};
 }
 function tempFireHit(cell, level){
   cell.record = {
@@ -2427,6 +2434,12 @@ function bigFlashPump(){
       // distance wording). A single-side hit still prints as before. Levels,
       // bands, records, bells and all other offices are untouched; if neither
       // level has landed the face still reads HELD.
+      // Exception 27 (Nov 20, 2026 — "Fix Mina's hit labels first"): the
+      // guard above never fired as written — tempHitState returned no dist
+      // on a hit, so b.dist / t.dist were always blank when both were hit
+      // and the bottom-first check always printed BOTTOM HIT. tempHitState
+      // now returns the distance on every state, so the nearer level's
+      // distance prints here as intended. No wording, band or level changed.
       var bothHit = (b.state === "hit" && t.state === "hit");
       if(bothHit && b.dist != null && (t.dist == null || Math.abs(b.dist) <= Math.abs(t.dist))){ word = b.dist.toFixed(2) + "% FROM THE BOTTOM"; color = "#8fb8a2"; }
       else if(bothHit && t.dist != null){ word = t.dist.toFixed(2) + "% FROM THE TOP"; color = "#8fb8a2"; }
