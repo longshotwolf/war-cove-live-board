@@ -1306,14 +1306,9 @@ h2{line-height:22px;}
 
   <section>
     <h2>TREASURY — THE MONEY TILL</h2>
-    <div class="desk">
-      <div>
-        <div class="dname">TREASURY — THE MONEY TILL</div>
-      </div>
-    </div>
     <div class="pots">
-      <div class="pot"><div class="pname">REPLICATE</div><div class="pstate">$10 · FUNDED · NOV 16, 2026</div></div>
-      <div class="pot"><div class="pname">SIMLI</div><div class="pstate">WORKING · NOV 14, 2026</div></div>
+      <div class="pot"><div class="pname">REPLICATE</div><div class="pstate">NOT CONFIRMED YET</div></div>
+      <div class="pot"><div class="pname">SIMLI</div><div class="pstate">NOT CONFIRMED YET</div></div>
       <div class="pot"><div class="pname">LUMA</div><div class="pstate">NOT CONFIRMED YET</div></div>
     </div>
   </section>
@@ -1549,26 +1544,25 @@ const FRAMES = [
   {key:"MONTH", iv:"1M"}, {key:"WEEK", iv:"1w"}, {key:"DAY", iv:"1d"},
   {key:"6H", iv:"6h"}, {key:"4H", iv:"4h"}
 ];
+/* TEMP STRENGTH RANKING (lock exception 24, Nov 20 2026 — the Warlord's order):
+   MONTH #1 STRONGEST / THE VERY BEST · WEEK #2 · DAY #3 · 6H #4 · 4H #5 WEAKEST.
+   Display-only labels on the temp-hit flash/banner, hit cells and hit bar. */
+const TEMP_RANK = {MONTH:"#1 STRONGEST", WEEK:"#2", DAY:"#3", "6H":"#4", "4H":"#5 WEAKEST"};
+function tempRank(frame){ return TEMP_RANK[frame] || ""; }
+
 const HIT_BAND = 0.0015;    // hit while within 0.15% of the level
 const PIERCE_BAND = 0.0005; // more than 0.05% through it = through
 const TEMP_FLASH_MS = 60000;
 
 function tempHitState(side, live, level){
-  // Exception 27 (Nov 20, 2026): the distance to the level is returned on
-  // EVERY state — hit and through as well as clear — never left blank.
-  // Mina's both-hit guard in mnPaint reads b.dist / t.dist to choose the
-  // nearer level; before this the hit return carried no dist at all, so
-  // the guard could never fire and both-hit always printed BOTTOM HIT.
   if(side === "bottom"){
-    const dist = Math.abs(live - level) / level * 100;
-    if(live < level * (1 - PIERCE_BAND)) return {state:"through", dist};
-    if(live <= level * (1 + HIT_BAND)) return {state:"hit", dist};
-    return {state:"clear", dist};
+    if(live < level * (1 - PIERCE_BAND)) return {state:"through"};
+    if(live <= level * (1 + HIT_BAND)) return {state:"hit"};
+    return {state:"clear", dist:(live - level) / level * 100};
   }
-  const dist = Math.abs(level - live) / level * 100;
-  if(live > level * (1 + PIERCE_BAND)) return {state:"through", dist};
-  if(live >= level * (1 - HIT_BAND)) return {state:"hit", dist};
-  return {state:"clear", dist};
+  if(live > level * (1 + PIERCE_BAND)) return {state:"through"};
+  if(live >= level * (1 - HIT_BAND)) return {state:"hit"};
+  return {state:"clear", dist:(level - live) / level * 100};
 }
 function tempFireHit(cell, level){
   cell.record = {
@@ -1873,7 +1867,7 @@ function tempRenderCell(cell){
     cell.stateEl.textContent = "THROUGH — NOT HOLDING";
     cell.el.classList.add("through");
   } else if(cell.state === "hit"){
-    cell.stateEl.textContent = cell.side === "bottom" ? "BOTTOM HIT — PRICE ON IT" : "TOP HIT — PRICE ON IT";
+    cell.stateEl.textContent = (cell.side === "bottom" ? "BOTTOM HIT — PRICE ON IT" : "TOP HIT — PRICE ON IT") + " · " + tempRank(cell.frame);
     cell.el.classList.remove("through");
   } else {
     cell.stateEl.textContent = cell.dist != null ? cell.dist.toFixed(2) + "% AWAY" : "—";
@@ -1903,7 +1897,7 @@ function tempRenderSideLights(){
     bar.classList.toggle("lit-b", side === "bottom" && !!litCell);
     bar.classList.toggle("lit-t", side === "top" && !!litCell);
     bar.textContent = litCell
-      ? "💡 " + (side === "bottom" ? "BOTTOM" : "TOP") + " HIT LIT — " + NAMES[litCell.symbol] + " " + litCell.frame
+      ? "💡 " + (side === "bottom" ? "BOTTOM" : "TOP") + " HIT LIT — " + NAMES[litCell.symbol] + " " + litCell.frame + " · " + tempRank(litCell.frame)
       : (side === "bottom" ? "NO BOTTOM HIT LIT" : "NO TOP HIT LIT");
   }
 }
@@ -2222,8 +2216,8 @@ function bigFlashPump(){
   var el = document.getElementById("bigflash");
   var bottom = hit.side === "bottom";
   el.querySelector(".bf-main").textContent = bottom
-    ? "TEMP BOTTOM ON THE " + hit.frame + " — GOOD LONG"
-    : "TEMP TOP ON THE " + hit.frame + " — GOOD SHORT";
+    ? "TEMP BOTTOM ON THE " + hit.frame + " — " + tempRank(hit.frame) + " — GOOD LONG"
+    : "TEMP TOP ON THE " + hit.frame + " — " + tempRank(hit.frame) + " — GOOD SHORT";
   el.querySelector(".bf-sub").textContent = hit.coin + " · " + fmtPrice(hit.price);
   el.className = bottom ? "show bottom" : "show top";
   setTimeout(function(){
@@ -2423,27 +2417,7 @@ function bigFlashPump(){
       F.cell.classList.add("landed");
       F.lvls.textContent = "B " + fmtPrice(b.level) + " · T " + fmtPrice(t.level);
       var word, color;
-      // MINA BOTH-HIT GUARD (lock exception 24, Nov 20 2026 — Warlord's word:
-      // "go over everything and get it done"). The 1-minute forming HA candle
-      // is narrower than two hit-bands (measured Nov 20, 2026: 0.095–0.159%
-      // wide on all six coins, HIT_BAND 0.15%), so live price sits inside the
-      // band of BOTH the 1m bottom and the 1m top at once, and both oneCells
-      // read "hit" together. The old bottom-first check then always printed
-      // BOTTOM HIT, even mid-candle. When both are hit, no single hit word
-      // is true: show the nearer level's distance instead (the existing
-      // distance wording). A single-side hit still prints as before. Levels,
-      // bands, records, bells and all other offices are untouched; if neither
-      // level has landed the face still reads HELD.
-      // Exception 27 (Nov 20, 2026 — "Fix Mina's hit labels first"): the
-      // guard above never fired as written — tempHitState returned no dist
-      // on a hit, so b.dist / t.dist were always blank when both were hit
-      // and the bottom-first check always printed BOTTOM HIT. tempHitState
-      // now returns the distance on every state, so the nearer level's
-      // distance prints here as intended. No wording, band or level changed.
-      var bothHit = (b.state === "hit" && t.state === "hit");
-      if(bothHit && b.dist != null && (t.dist == null || Math.abs(b.dist) <= Math.abs(t.dist))){ word = b.dist.toFixed(2) + "% FROM THE BOTTOM"; color = "#8fb8a2"; }
-      else if(bothHit && t.dist != null){ word = t.dist.toFixed(2) + "% FROM THE TOP"; color = "#8fb8a2"; }
-      else if(b.state === "hit"){ word = "BOTTOM HIT — PRICE ON IT"; color = "#fb7185"; }
+      if(b.state === "hit"){ word = "BOTTOM HIT — PRICE ON IT"; color = "#fb7185"; }
       else if(t.state === "hit"){ word = "TOP HIT — PRICE ON IT"; color = "#22ff88"; }
       else if(b.state === "through" || t.state === "through"){ word = "THROUGH — NOT HOLDING"; color = "#ffb3ab"; }
       else if(b.dist != null && (t.dist == null || Math.abs(b.dist) <= Math.abs(t.dist))){ word = b.dist.toFixed(2) + "% FROM THE BOTTOM"; color = "#8fb8a2"; }
