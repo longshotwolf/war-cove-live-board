@@ -525,6 +525,12 @@ h2{line-height:22px;}
 .pot .pname{line-height:17px;}
 .olabel{line-height:16px;}
 .calla-clabel{line-height:12px;}
+
+/* ---------- THE CANDLE COUNTDOWN WINDOW (the Warlord's order, Nov 22, 2026 — carried onto the master live board Nov 22, 2026): every candle office carries one small window beside its plate, counting down live to ITS OWN next candle on the tape's UTC grid — Mina 1M · Sierra 3M · Hera 1H · Sable + Juno 6H · Cora 4H · Dia DAY · Sela WEEK · Mona MONTH. The temp rooms (Terra/Vega) and the Liquidation Office read no single candle of their own and carry none. It is a clock, not a read: it claims nothing about the tape and never goes HELD. ---------- */
+.cd-chip{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(103,232,249,.35);background:rgba(0,0,0,.4);border-radius:6px;padding:6px 10px;margin:8px 0 4px}
+.cd-chip .cd-ico{font-size:13px;line-height:1}
+.cd-chip .cd-lab{font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:rgba(165,243,252,.6)}
+.cd-chip .cd-num{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1;color:#ecfeff}
 </style>
 </head>
 <body>
@@ -592,6 +598,7 @@ h2{line-height:22px;}
 
   <section>
     <h2>6H SPREAD — READING THE SIX HOUR</h2>
+<div class="cd-chip" data-cd-frame="6H"><span aria-hidden="true" class="cd-ico">⏳</span><span class="cd-lab">Next 6H candle</span><span class="cd-num" data-cd-num>--:--</span><span class="cd-lab">to go</span></div>
     <div class="desk">
       <img src="bots/sable.webp" alt="Sable at her desk">
       <div>
@@ -604,6 +611,7 @@ h2{line-height:22px;}
 
   <section>
     <h2>3M SURVEY — READING THE THREE MINUTE</h2>
+<div class="cd-chip" data-cd-frame="3M"><span aria-hidden="true" class="cd-ico">⏳</span><span class="cd-lab">Next 3M candle</span><span class="cd-num" data-cd-num>--:--</span><span class="cd-lab">to go</span></div>
     <div class="desk">
       <img src="bots/sierra.webp" alt="Sierra at her desk">
       <div>
@@ -642,6 +650,7 @@ h2{line-height:22px;}
 
   <section class="tempsec" id="temp-one">
     <h2>ONE MINUTE — TEMP WATCH</h2>
+<div class="cd-chip" data-cd-frame="1M"><span aria-hidden="true" class="cd-ico">⏳</span><span class="cd-lab">Next 1M candle</span><span class="cd-num" data-cd-num>--:--</span><span class="cd-lab">to go</span></div>
     <div class="desk">
       <img src="bots/mina.webp" alt="Mina at her desk">
       <div>
@@ -693,6 +702,7 @@ h2{line-height:22px;}
 
   <section>
     <h2>1H SURVEY — READING THE ONE HOUR</h2>
+<div class="cd-chip" data-cd-frame="1H"><span aria-hidden="true" class="cd-ico">⏳</span><span class="cd-lab">Next 1H candle</span><span class="cd-num" data-cd-num>--:--</span><span class="cd-lab">to go</span></div>
     <div class="desk">
       <img src="bots/hera.webp" alt="Hera at her desk">
       <div>
@@ -705,6 +715,7 @@ h2{line-height:22px;}
 
   <section>
     <h2>4H SURVEY — READING THE FOUR HOUR</h2>
+<div class="cd-chip" data-cd-frame="4H"><span aria-hidden="true" class="cd-ico">⏳</span><span class="cd-lab">Next 4H candle</span><span class="cd-num" data-cd-num>--:--</span><span class="cd-lab">to go</span></div>
     <div class="desk">
       <img src="bots/cora.webp" alt="Cora at her desk">
       <div>
@@ -717,6 +728,7 @@ h2{line-height:22px;}
 
   <section>
     <h2>6H SURVEY — READING THE SIX HOUR</h2>
+<div class="cd-chip" data-cd-frame="6H"><span aria-hidden="true" class="cd-ico">⏳</span><span class="cd-lab">Next 6H candle</span><span class="cd-num" data-cd-num>--:--</span><span class="cd-lab">to go</span></div>
     <div class="desk">
       <img src="bots/juno.webp" alt="Juno at her desk">
       <div>
@@ -729,6 +741,7 @@ h2{line-height:22px;}
 
   <section>
     <h2>DAY SURVEY — READING THE DAY</h2>
+<div class="cd-chip" data-cd-frame="DAY"><span aria-hidden="true" class="cd-ico">⏳</span><span class="cd-lab">Next DAY candle</span><span class="cd-num" data-cd-num>--:--</span><span class="cd-lab">to go</span></div>
     <div class="desk">
       <img src="bots/dia.webp" alt="Dia at her desk">
       <div>
@@ -741,6 +754,7 @@ h2{line-height:22px;}
 
   <section>
     <h2>WEEK SURVEY — READING THE WEEK</h2>
+<div class="cd-chip" data-cd-frame="WEEK"><span aria-hidden="true" class="cd-ico">⏳</span><span class="cd-lab">Next WEEK candle</span><span class="cd-num" data-cd-num>--:--</span><span class="cd-lab">to go</span></div>
     <div class="desk">
       <img src="bots/sela.webp" alt="Sela at her desk">
       <div>
@@ -753,6 +767,7 @@ h2{line-height:22px;}
 
   <section>
     <h2>MONTH SURVEY — READING THE MONTH</h2>
+<div class="cd-chip" data-cd-frame="MONTH"><span aria-hidden="true" class="cd-ico">⏳</span><span class="cd-lab">Next MONTH candle</span><span class="cd-num" data-cd-num>--:--</span><span class="cd-lab">to go</span></div>
     <div class="desk">
       <img src="bots/mona.webp" alt="Mona at her desk">
       <div>
@@ -2540,5 +2555,46 @@ setInterval(function(){if(ep){if(!viewed)send("/view");else send("/beat");}else 
 }catch(e){}})();
 </script>
 <!-- /WC-LINK-COUNTER -->
+
+<!-- THE CANDLE COUNTDOWN WINDOW — ticker (the Warlord's order, Nov 22, 2026): the next candle-open instant for a frame on the tape's UTC candle grid — minute frames on their minute marks, hour frames on their hour marks (4H and 6H divide the UTC day evenly), DAY at the next UTC midnight, WEEK at the next Monday UTC midnight, MONTH at the first of the next month UTC. The count: under an hour minutes:seconds, under a day hours:minutes:seconds, past a day days and hours. Re-ticked twice a second off the wall clock. -->
+<script>
+(function () {
+  function cdNextOpenMs(frame, nowMs) {
+    var d = new Date(nowMs);
+    if (frame === 'MONTH') return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1);
+    if (frame === 'WEEK') {
+      var midnight = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+      var daysSinceMonday = (d.getUTCDay() + 6) % 7;
+      return midnight - daysSinceMonday * 86400000 + 7 * 86400000;
+    }
+    if (frame === 'DAY') return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) + 86400000;
+    var periodMin = frame === '1M' ? 1 : frame === '3M' ? 3 : frame === '1H' ? 60 : frame === '4H' ? 240 : 360;
+    var periodMs = periodMin * 60000;
+    return Math.floor(nowMs / periodMs) * periodMs + periodMs;
+  }
+  function cdFmt(msLeft) {
+    var totalSecs = Math.max(0, Math.floor(msLeft / 1000));
+    var days = Math.floor(totalSecs / 86400);
+    var hours = Math.floor((totalSecs % 86400) / 3600);
+    var mins = Math.floor((totalSecs % 3600) / 60);
+    var secs = totalSecs % 60;
+    var ss = String(secs).padStart(2, '0');
+    if (days > 0) return days + 'd ' + hours + 'h ' + String(mins).padStart(2, '0') + 'm';
+    if (hours > 0) return hours + ':' + String(mins).padStart(2, '0') + ':' + ss;
+    return mins + ':' + ss;
+  }
+  function cdTick() {
+    var now = Date.now();
+    var nums = document.querySelectorAll('[data-cd-num]');
+    for (var i = 0; i < nums.length; i++) {
+      var chipEl = nums[i].parentNode;
+      var frame = chipEl && chipEl.getAttribute ? chipEl.getAttribute('data-cd-frame') : null;
+      if (frame) nums[i].textContent = cdFmt(Math.max(0, cdNextOpenMs(frame, now) - now));
+    }
+  }
+  cdTick();
+  setInterval(cdTick, 500);
+})();
+</script>
 </body>
 </html>
